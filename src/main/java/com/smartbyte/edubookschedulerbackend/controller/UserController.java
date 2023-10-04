@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+@RestController
 
 @RequestMapping("/users")
-@RestController
 @AllArgsConstructor
 public class UserController {
     private final LoginUseCase loginUseCase;
 
-    @PostMapping("/login")
+    @PostMapping(value = "login")
     ResponseEntity<LoginResponse> Login(@RequestBody LoginRequest request){
         return ResponseEntity.ok(loginUseCase.Login(request));
     }
