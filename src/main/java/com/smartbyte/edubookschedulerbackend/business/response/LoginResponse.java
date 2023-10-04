@@ -1,11 +1,11 @@
 package com.smartbyte.edubookschedulerbackend.business.response;
 
-import com.smartbyte.edubookschedulerbackend.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
-@Builder
 @AllArgsConstructor
+@Builder
 public class LoginResponse {
-    private User user;
+    private long id;
+    private String name;
 }

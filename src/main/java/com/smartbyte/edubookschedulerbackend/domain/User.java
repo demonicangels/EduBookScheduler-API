@@ -1,10 +1,12 @@
 package com.smartbyte.edubookschedulerbackend.domain;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 public abstract class User {
     Long id;
     String name;
