@@ -6,27 +6,56 @@ import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.IntStream;
 
 @Repository
 public class FakeUserRepositoryImpl implements UserRepository {
-    private final List<User>users;
 
-    public FakeUserRepositoryImpl() {
-        this.users=new ArrayList<>();
-        this.users.add(Student.builder()
-                .id(Long.valueOf("1"))
-                .name("Calvin")
-                .email("ckw28502@gmail.com")
-                .password("calvin")
-                .role(Role.Student)
-                .build());
+    private long _ID_COUNTER = 1;
+    private final List<User> users = new ArrayList<>();
+
+    @Override
+    public User createUser(User user) {
+        user.setId(_ID_COUNTER++);
+        users.add(user);
+        return user;
+    }
+
+    @Override
+    public Optional<User> getUserById(long id) {
+        return users.stream().filter(u -> ((Long)id).equals(u.getId())).findFirst();
     }
 
     @Override
     public Optional<User> getUserByEmail(String email) {
         return users.stream().filter((user)->user.getEmail().equalsIgnoreCase(email)).findFirst();
+    }
+
+    @Override
+    public List<User> getUsers() {
+        return Collections.unmodifiableList(users);
+    }
+
+    @Override
+    public Optional<User> updateUser(User user) {
+        Long nullUserId = user.getId();
+        if(nullUserId == null) return Optional.empty();
+        long userId = (long)nullUserId;
+        Optional<User> optOldUser = this.getUserById(userId);
+        if(optOldUser.isEmpty()) return Optional.empty();
+        User oldUser = optOldUser.get();
+        oldUser.setEmail(user.getEmail());
+        oldUser.setPassword(user.getPassword());
+        return Optional.of(oldUser);
+    }
+
+    @Override
+    public void deleteUser(User user) {
+        OptionalInt optIdx = IntStream.range(0, users.size())
+                .filter(i -> users.get(i).getId().equals(user.getId()))
+                .findFirst();
+        if(optIdx.isPresent())
+            users.remove(optIdx.getAsInt());
     }
 }
