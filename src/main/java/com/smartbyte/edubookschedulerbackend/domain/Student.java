@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class Student extends User {
+    private long PCN;
     @Override
     public Role getRole() {
         return Role.Student;

@@ -14,7 +14,6 @@ import java.util.stream.IntStream;
 
 @Repository
 public class FakeBookingRepositoryImpl implements BookingRepository {
-
     List<Booking> bookings = new ArrayList<>();
     private long _ID_COUNTER = 1;
 

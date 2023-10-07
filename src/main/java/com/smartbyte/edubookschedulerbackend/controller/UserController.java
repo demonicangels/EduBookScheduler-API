@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final LoginUseCase loginUseCase;
 
+    //TODO JAN do the controller for the booking
     @PostMapping(value = "login")
     ResponseEntity<LoginResponse> Login(@RequestBody LoginRequest request){
         return ResponseEntity.ok(loginUseCase.Login(request));
