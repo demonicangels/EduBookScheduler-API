@@ -8,5 +8,5 @@ import java.util.*;
 @Data
 @Builder
 public class RescheduleBookingResponse {
-    Optional<Booking> booking;
+    Booking booking;
 }

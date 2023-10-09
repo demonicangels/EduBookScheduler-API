@@ -7,6 +7,8 @@ import lombok.Data;
 
 import java.util.*;
 
+// Unused
+
 @Data
 @Builder
 public class GetUsersBookingRequest {
