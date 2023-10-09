@@ -78,7 +78,20 @@ public class BookingController {
 
     @PutMapping
     ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@RequestBody RescheduleBookingRequest request){
-        Optional<Booking> optNewBooking = bookingService.rescheduleBooking(request.getBooking());
+        Optional<User> optStudent = userService.getUser(request.getStudentId());
+        if(optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
+        Optional<User> optTutor = userService.getUser(request.getTutorId());
+        if(optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
+
+        Optional<Booking> optNewBooking = bookingService.rescheduleBooking(Booking.builder()
+                        .id(request.getId())
+                        .dateAndTime(request.getDateAndTime())
+                        .description(request.getDescription())
+                        .student((Student)optStudent.get())
+                        .tutor((Tutor)optTutor.get())
+                .build());
         if(optNewBooking.isEmpty())
             return ResponseEntity.unprocessableEntity().build();
 
