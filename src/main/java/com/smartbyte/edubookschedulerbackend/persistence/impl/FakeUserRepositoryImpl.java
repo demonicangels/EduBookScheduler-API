@@ -20,7 +20,7 @@ public class FakeUserRepositoryImpl implements UserRepository {
         users = new ArrayList<>(List.of(
                 Student.builder()
                         .id((long)1)
-                        .name("Nicolita la niña bonita")
+                        .name("Nicole")
                         .email("nikol@gmail.com")
                         .password("12345678")
                         .PCN(1234567)
