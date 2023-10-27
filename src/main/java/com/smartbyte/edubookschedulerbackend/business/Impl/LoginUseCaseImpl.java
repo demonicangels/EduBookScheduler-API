@@ -17,6 +17,16 @@ import java.util.Optional;
 public class LoginUseCaseImpl implements LoginUseCase {
     private final UserRepository userRepository;
 
+    /**
+     *
+     * @param request login request
+     * @return login response
+     *
+     * @should throw UserNotFoundException if email is invalid
+     * @should throw InvalidPasswordException if password is invalid
+     * @should throw InvalidPasswordException if password match but different case
+     * @should return login response when request is valid
+     */
     @Override
     public LoginResponse Login(LoginRequest request) {
         Optional<User>optionalUser=userRepository.getUserByEmail(request.getEmail());
@@ -26,7 +36,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
 
         User user=optionalUser.get();
 
-        if (!request.getPassword().equalsIgnoreCase(user.getPassword())){
+        if (!request.getPassword().equals(user.getPassword())){
             throw new InvalidPasswordException();
         }
 

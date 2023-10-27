@@ -37,6 +37,15 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteUser(user);
     }
 
+    /**
+     *
+     * @param id user id
+     * @return user profile
+     *
+     * @should throw UserNotFoundException if user id is invalid
+     * @should return a tutor profile if user id belongs to a tutor
+     * @should return a student profile if user id belongs to a student
+     */
     @Override
     public GetUserProfileResponse getUserProfile(long id) {
 
