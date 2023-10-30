@@ -3,9 +3,11 @@ package com.smartbyte.edubookschedulerbackend.business.response;
 import com.smartbyte.edubookschedulerbackend.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 @Getter
 public class LoginResponse {
