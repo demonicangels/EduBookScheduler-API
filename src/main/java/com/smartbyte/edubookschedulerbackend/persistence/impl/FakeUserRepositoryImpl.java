@@ -23,6 +23,7 @@ public class FakeUserRepositoryImpl implements UserRepository {
                         .name("Nicole")
                         .email("nikol@gmail.com")
                         .password("12345678")
+                        .profilePicURL("https://st3.depositphotos.com/3280405/17208/i/450/depositphotos_172088972-stock-photo-pretty-female-university-student-portrait.jpg")
                         .PCN(1234567)
                         .build(),
                 Tutor.builder()
@@ -30,6 +31,7 @@ public class FakeUserRepositoryImpl implements UserRepository {
                         .name("Capi")
                         .email("capi@gmail.com")
                         .password("12345678")
+                        .profilePicURL("https://i0.wp.com/freireschools.org/wp-content/uploads/2019/09/darren-2.png?fit=600%2C600&ssl=1")
                         .build()
         ));
     }

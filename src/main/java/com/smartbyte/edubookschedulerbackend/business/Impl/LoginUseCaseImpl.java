@@ -33,6 +33,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
         return LoginResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
+                .profilePicURL(user.getProfilePicURL())
                 .role(user.getRole())
                 .build();
     }

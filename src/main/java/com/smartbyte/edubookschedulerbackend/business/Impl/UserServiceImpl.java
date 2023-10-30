@@ -60,6 +60,7 @@ public class UserServiceImpl implements UserService {
         return GetUserProfileResponse.builder()
                 .id(id)
                 .email(user.getEmail())
+                .profilePicURL(user.getProfilePicURL())
                 .name(user.getName())
                 .role(user.getRole())
                 .PCN(PCN)
