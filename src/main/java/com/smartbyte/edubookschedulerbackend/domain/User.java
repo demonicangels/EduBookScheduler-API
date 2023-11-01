@@ -12,6 +12,7 @@ public abstract class User {
     String name;
     String email;
     String password;
+    String profilePicURL;
     @Setter(AccessLevel.NONE) //readonly
     Role role;
 }

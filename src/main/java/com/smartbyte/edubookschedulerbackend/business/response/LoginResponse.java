@@ -13,5 +13,6 @@ import lombok.Getter;
 public class LoginResponse {
     private long id;
     private String name;
+    private String profilePicURL;
     private Role role;
 }

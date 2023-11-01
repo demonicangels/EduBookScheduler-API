@@ -14,6 +14,7 @@ public class GetUserProfileResponse {
     private long id;
     private String name;
     private String email;
+    private String profilePicURL;
     private Role role;
     private OptionalLong PCN;
 }
