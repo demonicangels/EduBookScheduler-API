@@ -17,24 +17,29 @@ import java.util.OptionalLong;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+
     @Override
-    public User createUser(User u) {
-        return userRepository.createUser(u);
+    public User createUser(User user) {
+        return userRepository.save(user);
     }
 
     @Override
     public Optional<User> getUser(long id) {
-        return userRepository.getUserById(id);
+        return userRepository.findById(id);
     }
 
     @Override
     public Optional<User> updateUser(User user) {
-        return userRepository.updateUser(user);
+        if (userRepository.existsById(user.getId())) {
+            return Optional.of(userRepository.save(user));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
     public void deleteUser(User user) {
-        userRepository.deleteUser(user);
+        userRepository.delete(user);
     }
 
     /**

@@ -14,30 +14,33 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
+
     private final BookingRepository bookingRepository;
 
-    @Override
     public Booking createBooking(Booking booking) {
-        return bookingRepository.createBooking(booking);
+        return bookingRepository.save(booking);
     }
 
     @Override
     public Optional<Booking> rescheduleBooking(Booking booking) {
-        return bookingRepository.updateBooking(booking);
+        return Optional.of(bookingRepository.save(booking));
     }
 
     @Override
     public Optional<Booking> getBookingById(long id) {
-        return bookingRepository.getBookingById(id);
+        return bookingRepository.findById(id);
     }
 
     @Override
-    public List<Booking> getUsersBooking(User us) {
-        return bookingRepository.getBookingsFor(us);
+    public List<Booking> getUsersBooking(User user) {
+        return bookingRepository.findByUser(user);
     }
 
     @Override
     public void cancelAppointment(Booking booking) {
-        bookingRepository.deleteBooking(booking);
+        bookingRepository.delete(booking);
     }
+
+
+
 }

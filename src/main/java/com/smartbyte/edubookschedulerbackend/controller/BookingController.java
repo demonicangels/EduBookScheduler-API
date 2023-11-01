@@ -67,8 +67,8 @@ public class BookingController {
         Booking newBooking = Booking.builder()
                 .dateAndTime(request.getDateAndTime())
                 .description(request.getDescription())
-                .tutor(tutor)
-                .student(student)
+//                .tutor(tutor)
+//                .student(student)
                 .build();
         newBooking = bookingService.createBooking(newBooking);
         CreateBookingResponse response = CreateBookingResponse.builder()
@@ -90,8 +90,8 @@ public class BookingController {
                         .id(request.getId())
                         .dateAndTime(request.getDateAndTime())
                         .description(request.getDescription())
-                        .student((Student)optStudent.get())
-                        .tutor((Tutor)optTutor.get())
+//                        .student((Student)optStudent.get())
+//                        .tutor((Tutor)optTutor.get())
                 .build());
         if(optNewBooking.isEmpty())
             return ResponseEntity.unprocessableEntity().build();

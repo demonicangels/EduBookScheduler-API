@@ -1,5 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.domain;
 
+import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -7,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @AllArgsConstructor
 @SuperBuilder
+@Entity
 public class Tutor extends User {
     @Override
     public Role getRole() {

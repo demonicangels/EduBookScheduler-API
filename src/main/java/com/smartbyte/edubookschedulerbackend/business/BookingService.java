@@ -2,6 +2,7 @@ package com.smartbyte.edubookschedulerbackend.business;
 
 import com.smartbyte.edubookschedulerbackend.domain.Booking;
 import com.smartbyte.edubookschedulerbackend.domain.User;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntity;
 
 import java.util.*;
 
