@@ -23,7 +23,7 @@ public class UserEntity {
 
     @NotEmpty
     @Column(name = "name")
-    @Length(min = 2)
+    @Length(min = 2, max = 50)
     private String name;
 
     @NotEmpty
@@ -32,6 +32,7 @@ public class UserEntity {
     private String email;
 
     @NotEmpty
+    @Length(min = 5)
     @Column(name = "password")
     private String password;
 
