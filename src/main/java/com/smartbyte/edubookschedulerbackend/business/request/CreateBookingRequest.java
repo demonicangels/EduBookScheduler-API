@@ -13,10 +13,16 @@ import java.util.Date;
 public class CreateBookingRequest {
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    Date dateAndTime;
+    Date date;
     String description;
     @NotNull
     Long studentId;
+    @NotNull
+    Integer startTime;
+
+    @NotNull
+    Integer endTime;
+
     @NotNull
     Long tutorId;
 }

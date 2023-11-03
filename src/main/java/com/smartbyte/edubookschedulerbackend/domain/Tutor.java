@@ -8,7 +8,6 @@ import lombok.experimental.SuperBuilder;
 @Data
 @AllArgsConstructor
 @SuperBuilder
-@Entity
 public class Tutor extends User {
     @Override
     public Role getRole() {

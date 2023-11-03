@@ -5,14 +5,18 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.List;
 
 @Entity
 @Table(name = "edu_user")
-@Data
-@Builder
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.INTEGER)
+@Getter
+@Setter
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserEntity {
@@ -36,7 +40,7 @@ public class UserEntity {
     private String password;
 
     @NotNull
-    @Column(name = "role")
+    @Column(name = "role", insertable = false, updatable = false)
     private Integer role;
 
     @OneToMany(mappedBy = "student")
