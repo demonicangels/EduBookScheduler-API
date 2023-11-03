@@ -1,5 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.domain;
 
+import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 

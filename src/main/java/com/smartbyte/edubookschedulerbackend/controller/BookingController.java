@@ -65,10 +65,10 @@ public class BookingController {
 
 
         Booking newBooking = Booking.builder()
-                .dateAndTime(request.getDateAndTime())
+                .date(request.getDate())
                 .description(request.getDescription())
-                .tutor(tutor)
-                .student(student)
+//                .tutor(tutor)
+//                .student(student)
                 .build();
         newBooking = bookingService.createBooking(newBooking);
         CreateBookingResponse response = CreateBookingResponse.builder()
@@ -88,10 +88,10 @@ public class BookingController {
 
         Optional<Booking> optNewBooking = bookingService.rescheduleBooking(Booking.builder()
                         .id(request.getId())
-                        .dateAndTime(request.getDateAndTime())
+                        .date(request.getDate())
                         .description(request.getDescription())
-                        .student((Student)optStudent.get())
-                        .tutor((Tutor)optTutor.get())
+//                        .student((Student)optStudent.get())
+//                        .tutor((Tutor)optTutor.get())
                 .build());
         if(optNewBooking.isEmpty())
             return ResponseEntity.unprocessableEntity().build();

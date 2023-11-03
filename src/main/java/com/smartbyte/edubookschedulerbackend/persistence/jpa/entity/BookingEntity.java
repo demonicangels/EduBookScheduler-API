@@ -11,8 +11,9 @@ import java.util.Date;
 
 @Entity
 @Table(name = "booking")
-@Data
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookingEntity {
@@ -24,7 +25,6 @@ public class BookingEntity {
     @NotNull
     @Column(name = "date")
     private Date date;
-
 
     /*
         start and end time are defined as the

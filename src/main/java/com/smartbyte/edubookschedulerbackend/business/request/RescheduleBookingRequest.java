@@ -15,7 +15,12 @@ public class RescheduleBookingRequest {
     @NotNull
     Long id;
     @NotNull
-    Date dateAndTime;
+    Date date;
+    @NotNull
+    Integer startTime;
+    @NotNull
+    Integer endTime;
+
     String description;
     @NotNull
     Long studentId;

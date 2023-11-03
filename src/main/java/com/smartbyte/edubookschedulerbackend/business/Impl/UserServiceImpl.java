@@ -1,5 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
+import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
@@ -17,24 +18,30 @@ import java.util.OptionalLong;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final EntityConverter converter;
+
     @Override
-    public User createUser(User u) {
-        return userRepository.createUser(u);
+    public User createUser(User user) {
+        return converter.convertFromUserEntity(userRepository.save(converter.convertFromUser(user)));
     }
 
     @Override
     public Optional<User> getUser(long id) {
-        return userRepository.getUserById(id);
+        return Optional.of(converter.convertFromUserEntity(userRepository.findById(id).get()));
     }
 
     @Override
     public Optional<User> updateUser(User user) {
-        return userRepository.updateUser(user);
+        if (userRepository.existsById(user.getId())) {
+            return Optional.of(converter.convertFromUserEntity(userRepository.save(converter.convertFromUser(user))));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
     public void deleteUser(User user) {
-        userRepository.deleteUser(user);
+        userRepository.delete(converter.convertFromUser(user));
     }
 
     /**
@@ -50,7 +57,7 @@ public class UserServiceImpl implements UserService {
     public GetUserProfileResponse getUserProfile(long id) {
 
         //Get User by id from repository
-        Optional<User>optionalUser=userRepository.getUserById(id);
+        Optional<User>optionalUser = userRepository.getUserById(id);
 
         //Throw exception if user is not found
         if(optionalUser.isEmpty()){
