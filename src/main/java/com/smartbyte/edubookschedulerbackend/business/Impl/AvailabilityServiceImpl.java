@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 public class AvailabilityServiceImpl implements AvailabilityService {
 
     private BookingRepository bookingRepository;
-
     private UserRepository userRepository;
 
     @Override

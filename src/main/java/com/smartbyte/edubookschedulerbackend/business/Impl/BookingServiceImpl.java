@@ -23,8 +23,8 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final EntityConverter converter;
 
-    public Booking createBooking(Booking booking) {
-        return converter.convertFromBookingEntity(bookingRepository.save(converter.convertFromBooking(booking)));
+    public Optional<Booking> createBooking(Booking booking) {
+        return Optional.of(converter.convertFromBookingEntity(bookingRepository.save(converter.convertFromBooking(booking))));
     }
 
     @Override

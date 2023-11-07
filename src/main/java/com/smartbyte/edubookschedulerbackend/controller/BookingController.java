@@ -64,17 +64,26 @@ public class BookingController {
         Tutor tutor = (Tutor)optTutor.get();
 
 
-        Booking newBooking = Booking.builder()
+        Optional<Booking> newBooking = Optional.of(Booking.builder()
                 .date(request.getDate())
                 .description(request.getDescription())
 //                .tutor(tutor)
 //                .student(student)
-                .build();
-        newBooking = bookingService.createBooking(newBooking);
-        CreateBookingResponse response = CreateBookingResponse.builder()
-                .booking(newBooking)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                .build());
+
+        newBooking = bookingService.createBooking(newBooking.get());
+
+        if(!newBooking.isEmpty()){
+
+            CreateBookingResponse response = CreateBookingResponse.builder()
+                    .booking(newBooking.get())
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+
+
     }
 
     @PutMapping
