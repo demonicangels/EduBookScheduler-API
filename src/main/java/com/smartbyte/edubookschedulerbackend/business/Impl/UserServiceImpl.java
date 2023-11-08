@@ -7,6 +7,7 @@ import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileRes
 import com.smartbyte.edubookschedulerbackend.domain.Student;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -57,15 +58,15 @@ public class UserServiceImpl implements UserService {
     public GetUserProfileResponse getUserProfile(long id) {
 
         //Get User by id from repository
-        Optional<User>optionalUser = userRepository.getUserById(id);
+        UserEntity optionalUser = userRepository.getUserById(id);
 
         //Throw exception if user is not found
-        if(optionalUser.isEmpty()){
+        if(optionalUser == null) {
             throw new UserNotFoundException();
         }
 
         //get the user data
-        User user=optionalUser.get();
+        User user=converter.convertFromUserEntity(optionalUser);
 
         // return PCN value if user is a student, otherwise return a null
         OptionalLong PCN=(user instanceof Student)

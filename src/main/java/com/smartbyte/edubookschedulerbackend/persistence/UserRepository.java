@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    Optional<User> getUserById(long id);
+    UserEntity getUserById(long id);
 
     List<UserEntity> findByRole(Integer role);
     List<UserEntity> findByIdNotInAndRoleNot(List<Long> ids, Integer role);
