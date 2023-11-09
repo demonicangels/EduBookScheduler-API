@@ -7,25 +7,31 @@ import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+
 public class AvailabilityServiceImpl implements AvailabilityService {
 
-    private BookingRepository bookingRepository;
-    private UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    @Autowired
+    public AvailabilityServiceImpl(BookingRepository bookingRepository, UserRepository userRepository) {
+        this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public List<GetAvailabilityResponse> findAvailableTeachersByDateAndTime(GetAvailabilityRequest request) {
        // Guys explanation here we take the list of bookings that are in the selected date,time
-        List<BookingEntity> bookings = bookingRepository.findByDateAndStartTimeAndEndTime(request.getDate(), request.getStartTime(), request.getEndTime());
+        Date date = convertStringToDate(request.getDate());
+        List<BookingEntity> bookings = bookingRepository.findByDateAndStartTimeAndEndTime(date, request.getStartTime(), request.getEndTime());
 
         // We take the ids of teachers here
         List<UserEntity> teachers = bookings.stream()
@@ -38,5 +44,17 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 .isAvailable(!teachers.contains(userEntity))
                 .build()).toList();
     }
+    private Date convertStringToDate(String dateString) {
+        try {
+            // Use SimpleDateFormat to parse the string to a Date
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+            return inputFormat.parse(dateString);
+        } catch (ParseException e) {
+            // Handle the exception or log it
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }
 

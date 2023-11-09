@@ -14,8 +14,8 @@ java {
 
 flyway{
     url = 'jdbc:mysql://localhost:3306/EduBook'
-    user = 'nikol'
-    password = 'Ior7dh8Nrr'
+    user = 'root'
+    password = 'root'
     schemas = ['edubook']
     defaultSchema = 'edubook'
 }
