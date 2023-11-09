@@ -1,5 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
+import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.LoginUseCase;
 import com.smartbyte.edubookschedulerbackend.business.exception.InvalidPasswordException;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
@@ -7,6 +8,7 @@ import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.LoginResponse;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class LoginUseCaseImpl implements LoginUseCase {
     private final UserRepository userRepository;
+    private final EntityConverter entityConverter;
 
     /**
      *
@@ -29,12 +32,15 @@ public class LoginUseCaseImpl implements LoginUseCase {
      */
     @Override
     public LoginResponse Login(LoginRequest request) {
-        Optional<User>optionalUser=userRepository.getUserByEmail(request.getEmail());
+
+        Optional<UserEntity>optionalUser = userRepository.getUserByEmail(request.getEmail());
+
         if (optionalUser.isEmpty()){
             throw new UserNotFoundException();
         }
 
-        User user=optionalUser.get();
+        User user = entityConverter.convertFromUserEntity(optionalUser.get());
+
 
         if (!request.getPassword().equals(user.getPassword())){
             throw new InvalidPasswordException();

@@ -7,11 +7,15 @@ import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
     List<BookingEntity> findByStudent(UserEntity student);
+
     List<BookingEntity> findByTutor(UserEntity tutor);
+
+    List<BookingEntity> findByDateAndStartTimeAndEndTime(Date date, Integer start, Integer end);
 
 }
