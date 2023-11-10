@@ -20,6 +20,8 @@ public class LoginUseCaseImpl implements LoginUseCase {
     private final UserRepository userRepository;
     private final EntityConverter entityConverter;
 
+    private final EntityConverter entityConverter;
+
     /**
      *
      * @param request login request

@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
         Optional<UserEntity>optionalUser = userRepository.getUserById(id);
 
         //Throw exception if user is not found
-        if(optionalUser.isEmpty()){
+        if(optionalUser == null) {
             throw new UserNotFoundException();
         }
 
