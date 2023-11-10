@@ -12,8 +12,8 @@ import java.util.Date;
 @Builder
 public class CreateBookingRequest {
     @NotNull
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    Date date;
+    String date;
+    @NotNull
     String description;
     @NotNull
     Long studentId;
@@ -24,5 +24,5 @@ public class CreateBookingRequest {
     Integer endTime;
 
     @NotNull
-    Long tutorId;
+    String tutorName;
 }

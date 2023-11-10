@@ -4,7 +4,9 @@ import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
+import com.smartbyte.edubookschedulerbackend.domain.Role;
 import com.smartbyte.edubookschedulerbackend.domain.Student;
+import com.smartbyte.edubookschedulerbackend.domain.Tutor;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
@@ -83,5 +85,11 @@ public class UserServiceImpl implements UserService {
                 .PCN(PCN)
                 .build();
 
+    }
+
+    @Override
+    public Optional<User> getTutorByName(String name) {
+        UserEntity user = userRepository.findByNameAndRole(name,1);
+        return Optional.of(converter.convertFromUserEntity(user));
     }
 }

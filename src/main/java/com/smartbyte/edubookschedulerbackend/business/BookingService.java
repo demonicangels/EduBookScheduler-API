@@ -17,4 +17,6 @@ public interface BookingService {
     Optional<Booking> getBookingById(long id);
     List<Booking> getUsersBooking(User us);
     void cancelAppointment(Booking booking);
+
+    Booking createBooking2(Booking booking, String Date);
 }
