@@ -13,21 +13,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/booking")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173","http://localhost:4173"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:4173"})
 public class BookingController {
     private final BookingService bookingService;
     private final UserService userService;
 
     @GetMapping("/{id}")
-    ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id){
+    ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id) {
         Optional<Booking> optBooking = bookingService.getBookingById(id);
-        if(optBooking.isEmpty())
+        if (optBooking.isEmpty())
             return ResponseEntity.notFound().build();
         Booking booking = optBooking.get();
         GetBookingByIdResponse response = GetBookingByIdResponse.builder()
@@ -37,9 +39,9 @@ public class BookingController {
     }
 
     @GetMapping("/user/{id}")
-    ResponseEntity<GetUsersBookingResponse> getUsersBooking(@PathVariable("id") long id){
+    ResponseEntity<GetUsersBookingResponse> getUsersBooking(@PathVariable("id") long id) {
         Optional<User> optUser = userService.getUser(id);
-        if(optUser.isEmpty())
+        if (optUser.isEmpty())
             return ResponseEntity.notFound().build();
 
         User user = optUser.get();
@@ -51,49 +53,55 @@ public class BookingController {
 
     }
 
-    @PostMapping
-    ResponseEntity<CreateBookingResponse> createBooking(@RequestBody CreateBookingRequest request){
+    @PostMapping("/add")
+    ResponseEntity<CreateBookingResponse> createBooking(@RequestBody CreateBookingRequest request) {
         Optional<User> optStudent = userService.getUser(request.getStudentId());
-        if(optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
+        if (optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-        Optional<User> optTutor = userService.getUser(request.getTutorId());
-        if(optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
+        Optional<User> optTutor = userService.getTutorByName(request.getTutorName());
+        if (optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
 
-        Student student = (Student)optStudent.get();
-        Tutor tutor = (Tutor)optTutor.get();
+        User student = optStudent.get();
+        User tutor = optTutor.get();
 
-
-        Booking newBooking = Booking.builder()
-                .date(request.getDate())
+        Booking newBooking = (Booking.builder()
                 .description(request.getDescription())
-//                .tutor(tutor)
-//                .student(student)
-                .build();
-        newBooking = bookingService.createBooking(newBooking);
+                .tutor(tutor)
+                .student(student)
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
+                .build());
+
+        Booking new2Booking = bookingService.createBooking2(newBooking, request.getDate());
+
+
         CreateBookingResponse response = CreateBookingResponse.builder()
-                .booking(newBooking)
+                .booking(new2Booking)
                 .build();
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+
     }
 
     @PutMapping
-    ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@RequestBody RescheduleBookingRequest request){
+    ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
         Optional<User> optStudent = userService.getUser(request.getStudentId());
-        if(optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
+        if (optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
         Optional<User> optTutor = userService.getUser(request.getTutorId());
-        if(optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
+        if (optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
 
         Optional<Booking> optNewBooking = bookingService.rescheduleBooking(Booking.builder()
-                        .id(request.getId())
-                        .date(request.getDate())
-                        .description(request.getDescription())
+                .id(request.getId())
+                .date(request.getDate())
+                .description(request.getDescription())
 //                        .student((Student)optStudent.get())
 //                        .tutor((Tutor)optTutor.get())
                 .build());
-        if(optNewBooking.isEmpty())
+        if (optNewBooking.isEmpty())
             return ResponseEntity.unprocessableEntity().build();
 
         Booking newBooking = optNewBooking.get();

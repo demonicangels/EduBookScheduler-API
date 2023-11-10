@@ -14,7 +14,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Availability {
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     Date date;
     int startTime;
     int endTime;

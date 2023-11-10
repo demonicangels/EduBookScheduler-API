@@ -36,6 +36,7 @@ public class EntityConverter {
     public UserEntity convertFromUser(User user){
 
         return UserEntity.builder()
+                .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .password(user.getPassword())

@@ -18,6 +18,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class LoginUseCaseImpl implements LoginUseCase {
     private final UserRepository userRepository;
+    private final EntityConverter entityConverter;
 
     private final EntityConverter entityConverter;
 
@@ -33,12 +34,15 @@ public class LoginUseCaseImpl implements LoginUseCase {
      */
     @Override
     public LoginResponse Login(LoginRequest request) {
-        Optional<UserEntity>optionalUser=userRepository.findByEmail(request.getEmail());
+
+        Optional<UserEntity>optionalUser = userRepository.getUserByEmail(request.getEmail());
+
         if (optionalUser.isEmpty()){
             throw new UserNotFoundException();
         }
 
-        User user= entityConverter.convertFromUserEntity(optionalUser.get());
+        User user = entityConverter.convertFromUserEntity(optionalUser.get());
+
 
         if (!request.getPassword().equals(user.getPassword())){
             throw new InvalidPasswordException();

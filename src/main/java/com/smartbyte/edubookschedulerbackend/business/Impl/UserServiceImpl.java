@@ -4,7 +4,9 @@ import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
+import com.smartbyte.edubookschedulerbackend.domain.Role;
 import com.smartbyte.edubookschedulerbackend.domain.Student;
+import com.smartbyte.edubookschedulerbackend.domain.Tutor;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
@@ -58,7 +60,7 @@ public class UserServiceImpl implements UserService {
     public GetUserProfileResponse getUserProfile(long id) {
 
         //Get User by id from repository
-        UserEntity optionalUser = userRepository.getUserById(id);
+        Optional<UserEntity>optionalUser = userRepository.getUserById(id);
 
         //Throw exception if user is not found
         if(optionalUser == null) {
@@ -66,7 +68,7 @@ public class UserServiceImpl implements UserService {
         }
 
         //get the user data
-        User user=converter.convertFromUserEntity(optionalUser);
+        User user = converter.convertFromUserEntity(optionalUser.get());
 
         // return PCN value if user is a student, otherwise return a null
         OptionalLong PCN=(user instanceof Student)
@@ -83,5 +85,11 @@ public class UserServiceImpl implements UserService {
                 .PCN(PCN)
                 .build();
 
+    }
+
+    @Override
+    public Optional<User> getTutorByName(String name) {
+        UserEntity user = userRepository.findByNameAndRole(name,1);
+        return Optional.of(converter.convertFromUserEntity(user));
     }
 }

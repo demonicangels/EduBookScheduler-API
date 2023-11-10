@@ -11,10 +11,11 @@ import java.util.Date;
 @Builder
 public class GetAvailabilityRequest {
     @NotNull
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    Date date;
+    String date;
     @NotNull
     int startTime;
     @NotNull
     int endTime;
+
+
 }
