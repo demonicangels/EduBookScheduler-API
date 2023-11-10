@@ -34,12 +34,12 @@ public class Booking {
 
     @NotNull
     @Min(0)
-    @Max(1439)
+    @Max(9999)
     private Integer startTime;
 
     @NotNull
     @Min(0)
-    @Max(1439)
+    @Max(9999)
     private Integer endTime;
 
     @NotEmpty

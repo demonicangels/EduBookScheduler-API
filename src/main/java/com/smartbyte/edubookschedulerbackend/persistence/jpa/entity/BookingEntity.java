@@ -52,13 +52,12 @@ public class BookingEntity {
     @Column(name = "description")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "student_id")
     @EqualsAndHashCode.Exclude
     private UserEntity student;
 
-    @NotNull
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "tutor_id")
     @EqualsAndHashCode.Exclude
     private UserEntity tutor;
