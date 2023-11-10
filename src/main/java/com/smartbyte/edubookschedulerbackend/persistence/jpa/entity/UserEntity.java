@@ -39,6 +39,8 @@ public class UserEntity {
     @Column(name = "password")
     private String password;
 
+    private String profilePicURL;
+
     @NotNull
     @Column(name = "role", insertable = false, updatable = false)
     private Integer role;

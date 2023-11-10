@@ -40,6 +40,7 @@ public class EntityConverter {
                 .name(user.getName())
                 .email(user.getEmail())
                 .password(user.getPassword())
+                .profilePicURL(user.getProfilePicURL())
                 .role(user.getRole().ordinal())
                 .build();
     }
@@ -60,6 +61,7 @@ public class EntityConverter {
                 .name(studentInfoEntity.getName())
                 .email(studentInfoEntity.getEmail())
                 .password(studentInfoEntity.getPassword())
+                .profilePicURL(studentInfoEntity.getProfilePicURL())
                 .PCN(studentInfoEntity.getPcn())
                 .build();
     }
@@ -70,6 +72,7 @@ public class EntityConverter {
                 .name(tutorInfoEntity.getName())
                 .email(tutorInfoEntity.getEmail())
                 .password(tutorInfoEntity.getPassword())
+                .profilePicURL(tutorInfoEntity.getProfilePicURL())
                 .build();
     }
 }
