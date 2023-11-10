@@ -27,6 +27,15 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         this.userRepository = userRepository;
     }
 
+    /**
+     *
+     * @param request GetAvailability request
+     * @return List of GetAvailability response
+     *
+     * @should return an empty list if no teacher found
+     * @should return list of response when teacher are found
+     * @should return list of response with unavailable teacher when teacher has booking
+     */
     @Override
     public List<GetAvailabilityResponse> findAvailableTeachersByDateAndTime(GetAvailabilityRequest request) {
        // Guys explanation here we take the list of bookings that are in the selected date,time

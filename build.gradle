@@ -2,22 +2,43 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.4'
     id 'io.spring.dependency-management' version '1.1.3'
+    id 'jacoco'
+    id "org.sonarqube" version "4.2.1.3168"
     id "org.flywaydb.flyway" version '8.0.0'
 }
 
 group = 'com.smartbyte'
 version = '0.0.1-SNAPSHOT'
 
+sonar {
+    properties {
+        property "sonar.projectKey", "I508859_edubookschedulerbackend_AYuV2indVuR86IZV8Em_"
+        property "sonar.projectName", "EduBookSchedulerBackend"
+        property "sonar.qualitygate.wait", true
+    }
+}
+
 java {
     sourceCompatibility = '17'
 }
 
-flyway{
-    url = 'jdbc:mysql://localhost:3306/EduBook'
-    user = 'root'
-    password = 'Debgubakmo5'
-    schemas = ['edubook']
-    defaultSchema = 'edubook'
+def applicationPropertiesFile = file('src/main/resources/application.properties')
+
+if (applicationPropertiesFile.exists()) {
+    def properties = new Properties()
+    applicationPropertiesFile.withInputStream { inputStream ->
+        properties.load(inputStream)
+    }
+
+    // Configure Flyway
+    flyway {
+        url = properties.getProperty('spring.datasource.url')
+        driver = 'com.mysql.cj.jdbc.Driver'
+        user = properties.getProperty('spring.datasource.username')
+        password = properties.getProperty('spring.datasource.password')
+    }
+} else {
+    throw new GradleException("application.properties file not found!")
 }
 
 configurations {
@@ -36,7 +57,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.flywaydb:flyway-core'
-    implementation 'mysql:mysql-connector-java:8.0.28'
+    implementation 'mysql:mysql-connector-java:8.0.23'
     implementation 'org.flywaydb:flyway-mysql:8.4.4'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -46,4 +67,20 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required =true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/configuration/*"
+            ])
+        }))
+    }
 }
