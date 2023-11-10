@@ -22,12 +22,23 @@ java {
     sourceCompatibility = '17'
 }
 
-flyway{
-    url = 'jdbc:mysql://localhost:3306/EduBook'
-    user = 'root'
-    password = 'Debgubakmo5'
-    schemas = ['edubook']
-    defaultSchema = 'edubook'
+def applicationPropertiesFile = file('src/main/resources/application.properties')
+
+if (applicationPropertiesFile.exists()) {
+    def properties = new Properties()
+    applicationPropertiesFile.withInputStream { inputStream ->
+        properties.load(inputStream)
+    }
+
+    // Configure Flyway
+    flyway {
+        url = properties.getProperty('spring.datasource.url')
+        driver = 'com.mysql.cj.jdbc.Driver'
+        user = properties.getProperty('spring.datasource.username')
+        password = properties.getProperty('spring.datasource.password')
+    }
+} else {
+    throw new GradleException("application.properties file not found!")
 }
 
 configurations {
@@ -46,7 +57,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.flywaydb:flyway-core'
-    implementation 'mysql:mysql-connector-java:8.0.28'
+    implementation 'mysql:mysql-connector-java:8.0.23'
     implementation 'org.flywaydb:flyway-mysql:8.4.4'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
