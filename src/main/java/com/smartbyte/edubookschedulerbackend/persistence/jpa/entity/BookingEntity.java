@@ -39,13 +39,13 @@ public class BookingEntity {
     @NotNull
     @Column(name = "startTime")
     @Min(0)
-    @Max(1439)
+    @Max(9999)
     private Integer startTime;
 
     @NotNull
     @Column(name = "endTime")
     @Min(0)
-    @Max(1439)
+    @Max(9999)
     private Integer endTime;
 
     @NotEmpty
