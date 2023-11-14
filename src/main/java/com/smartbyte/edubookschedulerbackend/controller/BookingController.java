@@ -4,17 +4,13 @@ import com.smartbyte.edubookschedulerbackend.business.BookingService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.request.CreateBookingRequest;
 import com.smartbyte.edubookschedulerbackend.business.request.RescheduleBookingRequest;
-import com.smartbyte.edubookschedulerbackend.business.response.CreateBookingResponse;
-import com.smartbyte.edubookschedulerbackend.business.response.GetBookingByIdResponse;
-import com.smartbyte.edubookschedulerbackend.business.response.GetUsersBookingResponse;
-import com.smartbyte.edubookschedulerbackend.business.response.RescheduleBookingResponse;
+import com.smartbyte.edubookschedulerbackend.business.response.*;
 import com.smartbyte.edubookschedulerbackend.domain.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +47,12 @@ public class BookingController {
                 .build();
         return ResponseEntity.ok(response);
 
+    }
+
+    @GetMapping("upcoming/{studentId}")
+    ResponseEntity<List<GetUpcomingBookingsResponse>>getUpcomingBookings
+            (@PathVariable(value = "studentId")long studentId){
+        return ResponseEntity.ok(bookingService.getUpcomingBookings(studentId));
     }
 
     @PostMapping("/add")
