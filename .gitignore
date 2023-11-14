@@ -2,8 +2,9 @@ HELP.md
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+!**/src/main/**
+!**/src/test/**
+src/main/resources/application.properties
 
 ### STS ###
 .apt_generated
@@ -36,4 +37,3 @@ out/
 ### VS Code ###
 .vscode/
 *properties
-src/main/resources/application.properties
