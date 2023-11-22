@@ -2,9 +2,14 @@ package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.BookingService;
 import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
+import com.smartbyte.edubookschedulerbackend.business.exception.BookingNotFoundException;
+import com.smartbyte.edubookschedulerbackend.business.exception.InvalidBookingStateException;
+import com.smartbyte.edubookschedulerbackend.business.exception.InvalidNewBookingStateException;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
+import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
 import com.smartbyte.edubookschedulerbackend.domain.Booking;
+import com.smartbyte.edubookschedulerbackend.domain.State;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
@@ -144,6 +149,42 @@ public class BookingServiceImpl implements BookingService {
             e.printStackTrace();
             throw new RuntimeException("Error creating booking", e);
         }
+    }
+
+    /**
+     *
+     * @param request Update booking state request
+     *
+     * @should throw BookingNotFoundException if booking is not found
+     * @should throw InvalidBookingStateException if booking status is not found
+     * @should throw InvalidNewBookingStateException if the state flow is invalid
+     * @should update the booking state if the request is valid
+     */
+    @Override
+    @Transactional
+    public void updateBookingStatusRequest(UpdateBookingStateRequest request) {
+        //Check if the booking exists
+        Optional<BookingEntity>bookingEntity=bookingRepository.findById(request.getBookingId());
+        if (bookingEntity.isEmpty()){
+            throw new BookingNotFoundException();
+        }
+        Booking booking=converter.convertFromBookingEntity(bookingEntity.get());
+
+        //check if requested booking status is valid
+        if (!State.isStateValid(request.getBookingState())){
+            throw new InvalidBookingStateException();
+        }
+
+        State oldState =booking.getState();
+        State newState = State.fromStateId(request.getBookingState());
+
+        //check if the old state is modifiable to the new state
+        if (!oldState.getNextModifiableState().contains(newState)){
+            throw new InvalidNewBookingStateException();
+        }
+
+        bookingRepository.updateBookingState(request.getBookingId(), request.getBookingState());
+
     }
 
 
