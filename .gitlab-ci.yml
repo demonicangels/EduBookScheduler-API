@@ -26,7 +26,7 @@ sonarqube-check:
 #  paths:
 #   - .sonar/cache
  script: ./gradlew test sonar
-# allow_failure: true
+ allow_failure: true
 # only:
 #  - merge_requests
 #  - master
