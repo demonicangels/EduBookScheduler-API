@@ -5,7 +5,6 @@ import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntit
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.StudentInfoEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.TutorInfoEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +18,7 @@ public class EntityConverter {
                  .description(booking.getDescription())
                  .student(convertFromUser(booking.getStudent()))
                  .tutor(convertFromUser(booking.getTutor()))
+                 .state(booking.getState().getStateId())
                  .build();
     }
 
@@ -31,6 +31,7 @@ public class EntityConverter {
                 .description(bookingEntity.getDescription())
                 .student(convertFromUserEntity(bookingEntity.getStudent()))
                 .tutor(convertFromUserEntity(bookingEntity.getTutor()))
+                .state(State.fromStateId(bookingEntity.getState()))
                 .build();
     }
     public UserEntity convertFromUser(User user){

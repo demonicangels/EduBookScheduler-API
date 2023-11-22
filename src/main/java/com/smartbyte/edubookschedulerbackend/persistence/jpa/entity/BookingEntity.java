@@ -52,6 +52,22 @@ public class BookingEntity {
     @Column(name = "description")
     private String description;
 
+
+    /*
+     * Status
+     * 0 = Requested
+     * 1 = Scheduled
+     * 2 = Reschedule_Requested
+     * 3 = Rescheduled
+     * 4 = Cancelled
+     * 5 = Missed
+     * 6 = Finished
+     */
+
+    @NotNull
+    @Column(name = "state")
+    private Integer state;
+
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "student_id")
     @EqualsAndHashCode.Exclude

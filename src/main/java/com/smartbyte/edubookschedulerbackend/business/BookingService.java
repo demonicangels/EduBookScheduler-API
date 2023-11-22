@@ -1,5 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business;
 
+import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
 import com.smartbyte.edubookschedulerbackend.domain.Booking;
 import com.smartbyte.edubookschedulerbackend.domain.User;
@@ -21,5 +22,7 @@ public interface BookingService {
     void cancelAppointment(Booking booking);
 
     Booking createBooking2(Booking booking, String Date);
+
+    void updateBookingStatusRequest(UpdateBookingStateRequest request);
 
 }
