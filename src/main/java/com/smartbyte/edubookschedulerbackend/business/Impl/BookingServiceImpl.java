@@ -140,6 +140,7 @@ public class BookingServiceImpl implements BookingService {
                     .endTime(booking.getEndTime())
                     .student(student)
                     .tutor(tutor)
+                    .state(0)
                     .build();
             BookingEntity dataEntity = bookingRepository.save(entityManager.merge(data));
             Booking dataDomain = converter.convertFromBookingEntity(dataEntity);
