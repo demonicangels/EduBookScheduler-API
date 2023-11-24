@@ -152,10 +152,10 @@ import static org.mockito.Mockito.when;
 
     /**
      * @verifies throw BookingNotFoundException if booking is not found
-     * @see BookingServiceImpl#updateBookingStatusRequest(com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest)
+     * @see BookingServiceImpl#updateBookingState(com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest)
      */
     @Test
-    void updateBookingStatusRequest_shouldThrowBookingNotFoundExceptionIfBookingIsNotFound() {
+    void updateBookingState_shouldThrowBookingNotFoundExceptionIfBookingIsNotFound() {
         //Arrange
         UpdateBookingStateRequest request=UpdateBookingStateRequest.builder()
                 .bookingId(1L)
@@ -165,16 +165,16 @@ import static org.mockito.Mockito.when;
         when(bookingRepository.findById(request.getBookingId())).thenReturn(Optional.empty());
 
         //Act + Assert
-        assertThrows(BookingNotFoundException.class,()->bookingService.updateBookingStatusRequest(request));
+        assertThrows(BookingNotFoundException.class,()->bookingService.updateBookingState(request));
 
     }
 
     /**
      * @verifies throw InvalidBookingStateException if booking status is not found
-     * @see BookingServiceImpl#updateBookingStatusRequest(com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest)
+     * @see BookingServiceImpl#updateBookingState(com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest)
      */
     @Test
-    void updateBookingStatusRequest_shouldThrowInvalidBookingStateExceptionIfBookingStatusIsNotFound() {
+    void updateBookingState_shouldThrowInvalidBookingStateExceptionIfBookingStatusIsNotFound() {
         //Arrange
         UpdateBookingStateRequest request=UpdateBookingStateRequest.builder()
                 .bookingId(1L)
@@ -188,12 +188,12 @@ import static org.mockito.Mockito.when;
         when(bookingRepository.findById(request.getBookingId())).thenReturn(Optional.of(bookingEntity));
 
         //Act + Assert
-        assertThrows(InvalidBookingStateException.class,()->bookingService.updateBookingStatusRequest(request));
+        assertThrows(InvalidBookingStateException.class,()->bookingService.updateBookingState(request));
 
     }
 
 
-    private static Stream<Arguments>provideArgumentsFor_updateBookingStatusRequest_shouldThrowInvalidNewBookingStateExceptionIfTheStateFlowIsInvalid(){
+    private static Stream<Arguments>provideArgumentsFor_updateBookingState_shouldThrowInvalidNewBookingStateExceptionIfTheStateFlowIsInvalid(){
         return Stream.of(
                 Arguments.of(0,0),
                 Arguments.of(0,3),
@@ -245,11 +245,11 @@ import static org.mockito.Mockito.when;
 
     /**
      * @verifies throw InvalidNewBookingStateException if the state flow is invalid
-     * @see BookingServiceImpl#updateBookingStatusRequest(com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest)
+     * @see BookingServiceImpl#updateBookingState(com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest)
      */
     @ParameterizedTest
-    @MethodSource("provideArgumentsFor_updateBookingStatusRequest_shouldThrowInvalidNewBookingStateExceptionIfTheStateFlowIsInvalid")
-    void updateBookingStatusRequest_shouldThrowInvalidNewBookingStateExceptionIfTheStateFlowIsInvalid(int oldState, int newState) {
+    @MethodSource("provideArgumentsFor_updateBookingState_shouldThrowInvalidNewBookingStateExceptionIfTheStateFlowIsInvalid")
+    void updateBookingState_shouldThrowInvalidNewBookingStateExceptionIfTheStateFlowIsInvalid(int oldState, int newState) {
         //Arrange
         UpdateBookingStateRequest request=UpdateBookingStateRequest.builder()
                 .bookingId(1L)
@@ -271,11 +271,11 @@ import static org.mockito.Mockito.when;
         when(converter.convertFromBookingEntity(bookingEntity)).thenReturn(booking);
 
         //Act + Assert
-        assertThrows(InvalidNewBookingStateException.class,()->bookingService.updateBookingStatusRequest(request));
+        assertThrows(InvalidNewBookingStateException.class,()->bookingService.updateBookingState(request));
 
     }
 
-    private static Stream<Arguments>provideArgumentsFor_updateBookingStatusRequest_shouldUpdateTheBookingStateIfTheRequestIsValid(){
+    private static Stream<Arguments>provideArgumentsFor_updateBookingState_shouldUpdateTheBookingStateIfTheRequestIsValid(){
         return Stream.of(
                 Arguments.of(0,1),
                 Arguments.of(0,2),
@@ -295,11 +295,11 @@ import static org.mockito.Mockito.when;
 
     /**
      * @verifies update the booking state if the request is valid
-     * @see BookingServiceImpl#updateBookingStatusRequest(com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest)
+     * @see BookingServiceImpl#updateBookingState(com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest)
      */
     @ParameterizedTest
-    @MethodSource("provideArgumentsFor_updateBookingStatusRequest_shouldUpdateTheBookingStateIfTheRequestIsValid")
-    void updateBookingStatusRequest_shouldUpdateTheBookingStateIfTheRequestIsValid(int oldState,int newState) {
+    @MethodSource("provideArgumentsFor_updateBookingState_shouldUpdateTheBookingStateIfTheRequestIsValid")
+    void updateBookingState_shouldUpdateTheBookingStateIfTheRequestIsValid(int oldState,int newState) {
         //Arrange
         UpdateBookingStateRequest request=UpdateBookingStateRequest.builder()
                 .bookingId(1L)
@@ -321,7 +321,7 @@ import static org.mockito.Mockito.when;
         when(converter.convertFromBookingEntity(bookingEntity)).thenReturn(booking);
 
         //Act
-        bookingService.updateBookingStatusRequest(request);
+        bookingService.updateBookingState(request);
 
         //Assert
         verify(bookingRepository).updateBookingState(request.getBookingId(),request.getBookingState());

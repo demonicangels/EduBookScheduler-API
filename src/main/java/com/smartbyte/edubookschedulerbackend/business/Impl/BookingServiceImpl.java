@@ -140,6 +140,7 @@ public class BookingServiceImpl implements BookingService {
                     .endTime(booking.getEndTime())
                     .student(student)
                     .tutor(tutor)
+                    .state(0)
                     .build();
             BookingEntity dataEntity = bookingRepository.save(entityManager.merge(data));
             Booking dataDomain = converter.convertFromBookingEntity(dataEntity);
@@ -162,7 +163,7 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     @Transactional
-    public void updateBookingStatusRequest(UpdateBookingStateRequest request) {
+    public void updateBookingState(UpdateBookingStateRequest request) {
         //Check if the booking exists
         Optional<BookingEntity>bookingEntity=bookingRepository.findById(request.getBookingId());
         if (bookingEntity.isEmpty()){
