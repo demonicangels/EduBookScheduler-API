@@ -163,7 +163,7 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     @Transactional
-    public void updateBookingStatusRequest(UpdateBookingStateRequest request) {
+    public void updateBookingState(UpdateBookingStateRequest request) {
         //Check if the booking exists
         Optional<BookingEntity>bookingEntity=bookingRepository.findById(request.getBookingId());
         if (bookingEntity.isEmpty()){

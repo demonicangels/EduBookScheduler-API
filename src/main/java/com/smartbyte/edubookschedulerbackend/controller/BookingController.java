@@ -4,6 +4,7 @@ import com.smartbyte.edubookschedulerbackend.business.BookingService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.request.CreateBookingRequest;
 import com.smartbyte.edubookschedulerbackend.business.request.RescheduleBookingRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.*;
 import com.smartbyte.edubookschedulerbackend.domain.*;
 import lombok.RequiredArgsConstructor;
@@ -85,6 +86,12 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
 
+    }
+
+    @PutMapping("/state")
+    ResponseEntity<Void>updateBookingState(@RequestBody UpdateBookingStateRequest request){
+        bookingService.updateBookingState(request);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping
