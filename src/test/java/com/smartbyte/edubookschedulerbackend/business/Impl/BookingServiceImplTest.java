@@ -1,23 +1,14 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
-import com.smartbyte.edubookschedulerbackend.business.exception.BookingNotFoundException;
-import com.smartbyte.edubookschedulerbackend.business.exception.InvalidBookingStateException;
-import com.smartbyte.edubookschedulerbackend.business.exception.InvalidNewBookingStateException;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
-import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
-import com.smartbyte.edubookschedulerbackend.domain.Booking;
-import com.smartbyte.edubookschedulerbackend.domain.State;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -113,14 +104,14 @@ import static org.mockito.Mockito.when;
         List<BookingEntity>bookings=List.of(BookingEntity.builder()
                 .id(1L)
                 .tutor(tutor)
-                .startTime(720)
+                .startTime(1439)
                 .description("meeting")
                 .date(new Date())
                 .build(),
                 BookingEntity.builder()
                         .id(2L)
                         .tutor(tutor)
-                        .startTime(750)
+                        .startTime(1439)
                         .description("meeting 2")
                         .date(new Date())
                         .build()
