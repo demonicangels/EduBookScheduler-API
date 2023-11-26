@@ -9,6 +9,7 @@ import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundExce
 import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
 import com.smartbyte.edubookschedulerbackend.domain.Booking;
+import com.smartbyte.edubookschedulerbackend.domain.Role;
 import com.smartbyte.edubookschedulerbackend.domain.State;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
@@ -152,40 +153,49 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    /**
-     *
-     * @param request Update booking state request
-     *
-     * @should throw BookingNotFoundException if booking is not found
-     * @should throw InvalidBookingStateException if booking status is not found
-     * @should throw InvalidNewBookingStateException if the state flow is invalid
-     * @should update the booking state if the request is valid
-     */
     @Override
     @Transactional
-    public void updateBookingState(UpdateBookingStateRequest request) {
+    public void scheduleBooking(UpdateBookingStateRequest request) {
+        updateBookingState(request.getBookingId(),State.Rescheduled);
+    }
+
+    @Override
+    @Transactional
+    public void acceptBooking(UpdateBookingStateRequest request) {
+        updateBookingState(request.getBookingId(),State.Scheduled);
+    }
+
+    @Override
+    @Transactional
+    public void cancelBooking(UpdateBookingStateRequest request) {
+        updateBookingState(request.getBookingId(),State.Cancelled);
+    }
+
+    @Override
+    @Transactional
+    public void finishBooking(UpdateBookingStateRequest request) {
+        updateBookingState(request.getBookingId(),State.Finished);
+    }
+
+    @Transactional
+    public void updateBookingState(long bookingId,State newState) {
         //Check if the booking exists
-        Optional<BookingEntity>bookingEntity=bookingRepository.findById(request.getBookingId());
+        Optional<BookingEntity>bookingEntity=bookingRepository.findById(bookingId);
         if (bookingEntity.isEmpty()){
             throw new BookingNotFoundException();
         }
         Booking booking=converter.convertFromBookingEntity(bookingEntity.get());
 
-        //check if requested booking status is valid
-        if (!State.isStateValid(request.getBookingState())){
-            throw new InvalidBookingStateException();
-        }
-
         State oldState =booking.getState();
-        State newState = State.fromStateId(request.getBookingState());
+
+        List<Role>allowedRoles=oldState.getNextModifiableState().get(newState);
 
         //check if the old state is modifiable to the new state
-        if (!oldState.getNextModifiableState().contains(newState)){
+        //TODO change validations to user's role
+        if (allowedRoles==null){
             throw new InvalidNewBookingStateException();
         }
-
-        bookingRepository.updateBookingState(request.getBookingId(), request.getBookingState());
-
+        bookingRepository.updateBookingState(bookingId, newState.getStateId());
     }
 
 

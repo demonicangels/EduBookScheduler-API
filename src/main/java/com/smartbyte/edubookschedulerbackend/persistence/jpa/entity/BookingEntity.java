@@ -54,14 +54,15 @@ public class BookingEntity {
 
 
     /*
-     * Status
+     * State
      * 0 = Requested
      * 1 = Scheduled
-     * 2 = Reschedule_Requested
-     * 3 = Rescheduled
-     * 4 = Cancelled
-     * 5 = Missed
-     * 6 = Finished
+     * 2 = Cancelled
+     * 3 = Missed
+     * 4 = Finished
+     * 5 = Tutor_Reschedule_Requested
+     * 6 = Student_Reschedule_Requested
+     * 7 = Rescheduled
      */
 
     @NotNull
