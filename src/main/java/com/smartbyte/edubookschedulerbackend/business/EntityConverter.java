@@ -12,6 +12,7 @@ public class EntityConverter {
     public BookingEntity convertFromBooking(Booking booking){
 
          return BookingEntity.builder()
+                 .id(booking.getId())
                  .date(booking.getDate())
                  .startTime(booking.getStartTime())
                  .endTime(booking.getEndTime())
@@ -25,6 +26,7 @@ public class EntityConverter {
     public Booking convertFromBookingEntity(BookingEntity bookingEntity){
 
         return Booking.builder()
+                .id(bookingEntity.getId())
                 .date(bookingEntity.getDate())
                 .startTime(bookingEntity.getStartTime())
                 .endTime(bookingEntity.getEndTime())
