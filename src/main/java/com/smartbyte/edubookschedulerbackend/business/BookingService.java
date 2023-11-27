@@ -4,6 +4,7 @@ import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingState
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
 import com.smartbyte.edubookschedulerbackend.domain.Booking;
 import com.smartbyte.edubookschedulerbackend.domain.User;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntity;
 
 import java.util.*;
 
@@ -20,9 +21,7 @@ public interface BookingService {
     Optional<Booking> getBookingById(long id);
     List<Booking> getUsersBooking(User us);
     void cancelAppointment(Booking booking);
-
     Booking createBooking2(Booking booking, String Date);
-
     void scheduleBooking(UpdateBookingStateRequest request);
     void acceptBooking(UpdateBookingStateRequest request);
     void cancelBooking(UpdateBookingStateRequest request);

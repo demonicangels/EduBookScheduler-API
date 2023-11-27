@@ -1,7 +1,7 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.BookingService;
-import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.BookingNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.exception.InvalidBookingStateException;
 import com.smartbyte.edubookschedulerbackend.business.exception.InvalidNewBookingStateException;
@@ -195,6 +195,7 @@ public class BookingServiceImpl implements BookingService {
         if (allowedRoles==null){
             throw new InvalidNewBookingStateException();
         }
+
         bookingRepository.updateBookingState(bookingId, newState.getStateId());
     }
 

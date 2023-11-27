@@ -1,7 +1,7 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.AvailabilityService;
-import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.GetAvailabilityRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetAvailabilityResponse;

@@ -1,6 +1,13 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
+<<<<<<< Updated upstream
 import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
+=======
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
+import com.smartbyte.edubookschedulerbackend.business.exception.BookingNotFoundException;
+import com.smartbyte.edubookschedulerbackend.business.exception.InvalidBookingStateException;
+import com.smartbyte.edubookschedulerbackend.business.exception.InvalidNewBookingStateException;
+>>>>>>> Stashed changes
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;

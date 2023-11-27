@@ -39,6 +39,8 @@ public class UserEntity {
     @Column(name = "password")
     private String password;
 
+    @Lob
+    @Column(name = "profile_picurl")
     private String profilePicURL;
 
     @NotNull
