@@ -1,13 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
-<<<<<<< Updated upstream
-import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
-=======
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
-import com.smartbyte.edubookschedulerbackend.business.exception.BookingNotFoundException;
-import com.smartbyte.edubookschedulerbackend.business.exception.InvalidBookingStateException;
-import com.smartbyte.edubookschedulerbackend.business.exception.InvalidNewBookingStateException;
->>>>>>> Stashed changes
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
@@ -26,11 +19,9 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
