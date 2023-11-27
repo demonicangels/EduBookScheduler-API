@@ -11,5 +11,4 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdateBookingStateRequest {
     private long bookingId;
-    private int bookingState;
 }

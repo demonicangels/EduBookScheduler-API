@@ -23,6 +23,10 @@ public interface BookingService {
 
     Booking createBooking2(Booking booking, String Date);
 
-    void updateBookingState(UpdateBookingStateRequest request);
+    void scheduleBooking(UpdateBookingStateRequest request);
+    void acceptBooking(UpdateBookingStateRequest request);
+    void cancelBooking(UpdateBookingStateRequest request);
+    void finishBooking(UpdateBookingStateRequest request);
+
 
 }

@@ -88,9 +88,22 @@ public class BookingController {
 
     }
 
-    @PutMapping("/state")
-    ResponseEntity<Void>updateBookingState(@RequestBody UpdateBookingStateRequest request){
-        bookingService.updateBookingState(request);
+    @PutMapping("/schedule")
+    ResponseEntity<Void>scheduleBooking(@RequestBody UpdateBookingStateRequest request){
+        bookingService.scheduleBooking(request);
+        return ResponseEntity.noContent().build();
+    }
+    @PutMapping("/cancel")
+    ResponseEntity<Void>cancelBooking(@RequestBody UpdateBookingStateRequest request){
+        bookingService.cancelBooking(request);
+        return ResponseEntity.noContent().build();
+    }@PutMapping("/accept")
+    ResponseEntity<Void>acceptBooking(@RequestBody UpdateBookingStateRequest request){
+        bookingService.acceptBooking(request);
+        return ResponseEntity.noContent().build();
+    }@PutMapping("/finish")
+    ResponseEntity<Void>finishBooking(@RequestBody UpdateBookingStateRequest request){
+        bookingService.finishBooking(request);
         return ResponseEntity.noContent().build();
     }
 
