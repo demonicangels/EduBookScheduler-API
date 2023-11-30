@@ -1,17 +1,16 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.BookingService;
+import com.smartbyte.edubookschedulerbackend.business.UserService;
+import com.smartbyte.edubookschedulerbackend.business.exception.*;
+import com.smartbyte.edubookschedulerbackend.business.request.AcceptBookingRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.RescheduleBookingRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.ScheduleBookingRequest;
+import com.smartbyte.edubookschedulerbackend.domain.*;
+import com.smartbyte.edubookschedulerbackend.persistence.BookingRequestRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
-import com.smartbyte.edubookschedulerbackend.business.exception.BookingNotFoundException;
-import com.smartbyte.edubookschedulerbackend.business.exception.InvalidBookingStateException;
-import com.smartbyte.edubookschedulerbackend.business.exception.InvalidNewBookingStateException;
-import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
-import com.smartbyte.edubookschedulerbackend.domain.Booking;
-import com.smartbyte.edubookschedulerbackend.domain.Role;
-import com.smartbyte.edubookschedulerbackend.domain.State;
-import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntity;
@@ -20,7 +19,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,16 +35,14 @@ public class BookingServiceImpl implements BookingService {
 
 
     private final BookingRepository bookingRepository;
+    // TODO: Get rid of userRepository. should use the user service.
+    private final UserService userService;
     private final UserRepository userRepository;
     private final EntityConverter converter;
+    private final BookingRequestRepository bookingRequestRepo;
     @PersistenceContext
     private EntityManager entityManager;
     public Optional<Booking> createBooking(Booking booking) {
-        return Optional.of(converter.convertFromBookingEntity(bookingRepository.save(converter.convertFromBooking(booking))));
-    }
-
-    @Override
-    public Optional<Booking> rescheduleBooking(Booking booking) {
         return Optional.of(converter.convertFromBookingEntity(bookingRepository.save(converter.convertFromBooking(booking))));
     }
 
@@ -60,35 +59,37 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<GetUpcomingBookingsResponse> getUpcomingBookings(long studentId) {
         //check if user exists
-        Optional<UserEntity>user=userRepository.getUserById(studentId);
-        if (user.isEmpty()){
+        Optional<UserEntity> user = userRepository.getUserById(studentId);
+        if(user.isEmpty()){
             throw new UserNotFoundException();
         }
 
-        LocalDate currentDate=LocalDate.now();
-        LocalTime currentTime=LocalTime.now();
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = LocalTime.now();
 
-        int minutes=currentTime.getHour()*60+currentTime.getMinute();
+        int minutes = currentTime.getHour()*60 + currentTime.getMinute();
 
         //Fetch the bookings
-        List<BookingEntity>bookingEntities= bookingRepository.getUpcomingBookings(
-                Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), user.get());
+        List<Booking> bookings = bookingRepository.getUpcomingBookings(
+                Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), user.get()
+        ).stream().map(converter::convertFromBookingEntity).toList();
 
-        List<GetUpcomingBookingsResponse>responses=new ArrayList<>();
+        List<GetUpcomingBookingsResponse> responses = new ArrayList<>();
 
-        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         //Return list of responses
-        for(BookingEntity bookingEntity:bookingEntities){
-            LocalDate date=bookingEntity.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            if (date.isAfter(currentDate)||(date.equals(currentDate)&&bookingEntity.getStartTime()>minutes)){
+        for(Booking booking : bookings){
+            LocalDate date = booking.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            if ((date.isAfter(currentDate) || (date.equals(currentDate) && booking.getStartTime() > minutes))
+                && booking.getState() == State.Requested){
                 responses.add(GetUpcomingBookingsResponse.builder()
-                        .id(bookingEntity.getId())
-                        .tutorName(bookingEntity.getTutor().getName())
-                        .startHour(bookingEntity.getStartTime()/60)
-                        .startMinute(bookingEntity.getStartTime()%60)
-                        .date(dateFormat.format(bookingEntity.getDate()))
-                        .description(bookingEntity.getDescription())
+                        .id(booking.getId())
+                        .tutorName(booking.getTutor().getName())
+                        .startHour(booking.getStartTime()/60)
+                        .startMinute(booking.getStartTime()%60)
+                        .date(dateFormat.format(booking.getDate()))
+                        .description(booking.getDescription())
                         .build());
             }
         }
@@ -155,14 +156,143 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public void scheduleBooking(UpdateBookingStateRequest request) {
-        updateBookingState(request.getBookingId(),State.Rescheduled);
+    public void scheduleBooking(ScheduleBookingRequest request) {
+
+        User requester = userService.getUser(request.getRequesterId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Requestor doesn't exist"
+                        )
+                );
+        User receiver = userService.getUser(request.getReceiverId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Receiver doesn't exist"
+                        )
+                );
+        // requester can only be a tutor and receiver a student for now
+        if(!(requester.getRole() == Role.Tutor && receiver.getRole() == Role.Student)){
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Requestor should be a tutor and receiver a student");
+        }
+
+
+        Booking booking = Booking.builder()
+                .date(request.getDate())
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
+                .description(request.getDescription())
+                .tutor(requester)
+                .student(receiver)
+                .state(State.Requested)
+                .build();
+        BookingRequest bookingRequest = BookingRequest.builder()
+                .requestType(BookingRequestType.Schedule)
+                .requester(requester)
+                .receiver(receiver)
+                .bookingToSchedule(booking)
+                .build();
+
+        bookingRequestRepo.save(converter.convertFromBookingRequest(bookingRequest));
     }
 
     @Override
     @Transactional
-    public void acceptBooking(UpdateBookingStateRequest request) {
-        updateBookingState(request.getBookingId(),State.Scheduled);
+    public void rescheduleBooking(RescheduleBookingRequest request) {
+        User requester = userService.getUser(request.getRequesterId())
+                .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.UNPROCESSABLE_ENTITY,
+                                "Requestor doesn't exist"
+                        )
+                );
+        User receiver = userService.getUser(request.getReceiverId())
+                .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.UNPROCESSABLE_ENTITY,
+                                "Receiver doesn't exist"
+                        )
+                );
+        Booking rescheduledBooking = getBookingById(request.getRescheduledBookingId())
+                .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.UNPROCESSABLE_ENTITY,
+                                "Booking doesn't exist"
+                        )
+                );
+
+        updateBookingState(rescheduledBooking.getId(), State.Reschedule_Requested);
+
+        Booking schedBooking = Booking.builder()
+                .date(request.getDate())
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
+                .description(request.getDescription())
+                .tutor(requester)
+                .student(receiver)
+                .state(State.Reschedule_Wait_Accept)
+                .build();
+        BookingRequest bookingRequest = BookingRequest.builder()
+                .requestType(BookingRequestType.Reschedule)
+                .requester(requester)
+                .receiver(receiver)
+                .bookingToSchedule(schedBooking)
+                .bookingToReschedule(rescheduledBooking)
+                .build();
+
+        bookingRequestRepo.save(converter.convertFromBookingRequest(bookingRequest));
+
+
+    }
+
+    @Override
+    @Transactional
+    public void acceptBooking(AcceptBookingRequest request) {
+        BookingRequest schedBookingRequest = this.getBookingRequestById(request.getBookingRequestId())
+                .orElseThrow(BookingRequestNotFoundException::new);
+
+        BookingRequestAnswer answer;
+        BookingRequestAnswer[] answerValues =  BookingRequestAnswer.values();
+        int ansId = request.getAnswer();
+        if(!(0 <= ansId && ansId < answerValues.length)){
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        answer = answerValues[ansId];
+
+        if(schedBookingRequest.getAnswer() != BookingRequestAnswer.NoAnswer)
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Booking request already answered");
+        if(answer == BookingRequestAnswer.NoAnswer)
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Can't answer NoAnswer");
+
+        bookingRequestRepo.updateAnswer(schedBookingRequest.getId(), answer);
+
+        if(answer == BookingRequestAnswer.Accepted){
+            switch(schedBookingRequest.getRequestType()){
+                case Schedule:
+                    if(schedBookingRequest.getBookingToSchedule().getState() != State.Requested)
+                        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                                "Schedule request on non-Requested booking");
+                    updateBookingState(schedBookingRequest.getBookingToSchedule().getId(), State.Scheduled);
+                    break;
+                case Reschedule:
+                    if(schedBookingRequest.getBookingToReschedule().getState() != State.Reschedule_Requested)
+                        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                                "Reschedule request on non-Reschedule_Requested booking");
+                    if(schedBookingRequest.getBookingToSchedule().getState() != State.Reschedule_Wait_Accept)
+                        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                                "scheduled booking for rescheduling not in Reschedule_Wait_accept state");
+                    updateBookingState(schedBookingRequest.getBookingToReschedule().getId(), State.Rescheduled);
+                    updateBookingState(schedBookingRequest.getBookingToSchedule().getId(), State.Scheduled);
+                    break;
+            }
+        } else if (answer == BookingRequestAnswer.Rejected) {
+            updateBookingState(schedBookingRequest.getBookingToReschedule().getId(), State.Cancelled);
+            Booking schedBooking = schedBookingRequest.getBookingToSchedule();
+            if(schedBooking != null){
+                updateBookingState(schedBooking.getId(), State.Cancelled);
+            }
+        }
+
+
     }
 
     @Override
@@ -177,22 +307,28 @@ public class BookingServiceImpl implements BookingService {
         updateBookingState(request.getBookingId(),State.Finished);
     }
 
+    @Override
+    public Optional<BookingRequest> getBookingRequestById(long id) {
+         return bookingRequestRepo.findById(id)
+                 .map(converter::convertFromBookingRequestEntity);
+    }
+
     @Transactional
     public void updateBookingState(long bookingId,State newState) {
         //Check if the booking exists
-        Optional<BookingEntity>bookingEntity=bookingRepository.findById(bookingId);
+        Optional<BookingEntity> bookingEntity = bookingRepository.findById(bookingId);
         if (bookingEntity.isEmpty()){
             throw new BookingNotFoundException();
         }
-        Booking booking=converter.convertFromBookingEntity(bookingEntity.get());
+        Booking booking = converter.convertFromBookingEntity(bookingEntity.get());
 
-        State oldState =booking.getState();
+        State oldState = booking.getState();
 
-        List<Role>allowedRoles=oldState.getNextModifiableState().get(newState);
+        List<Role> allowedRoles = oldState.getNextModifiableState().get(newState);
 
         //check if the old state is modifiable to the new state
         //TODO change validations to user's role
-        if (allowedRoles==null){
+        if (allowedRoles == null){
             throw new InvalidNewBookingStateException();
         }
 

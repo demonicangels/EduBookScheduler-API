@@ -60,21 +60,21 @@ public class BookingEntity {
      * 2 = Cancelled
      * 3 = Missed
      * 4 = Finished
-     * 5 = Tutor_Reschedule_Requested
-     * 6 = Student_Reschedule_Requested
-     * 7 = Rescheduled
+     * 5 = Reschedule_Requested
+     * 6 = Rescheduled
+     * 7 = Reschedule_Wait_Accept
      */
 
     @NotNull
     @Column(name = "state")
     private Integer state;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "student_id")
     @EqualsAndHashCode.Exclude
     private UserEntity student;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "tutor_id")
     @EqualsAndHashCode.Exclude
     private UserEntity tutor;

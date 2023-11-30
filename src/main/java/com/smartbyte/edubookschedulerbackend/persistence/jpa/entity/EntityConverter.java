@@ -1,16 +1,13 @@
 package com.smartbyte.edubookschedulerbackend.persistence.jpa.entity;
 
 import com.smartbyte.edubookschedulerbackend.domain.*;
-import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntity;
-import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.StudentInfoEntity;
-import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.TutorInfoEntity;
-import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EntityConverter {
-    public BookingEntity convertFromBooking(Booking booking){
 
+    public BookingEntity convertFromBooking(Booking booking){
+         if(booking == null) return null;
          return BookingEntity.builder()
                  .id(booking.getId())
                  .date(booking.getDate())
@@ -24,7 +21,7 @@ public class EntityConverter {
     }
 
     public Booking convertFromBookingEntity(BookingEntity bookingEntity){
-
+        if(bookingEntity == null) return null;
         return Booking.builder()
                 .id(bookingEntity.getId())
                 .date(bookingEntity.getDate())
@@ -37,7 +34,7 @@ public class EntityConverter {
                 .build();
     }
     public UserEntity convertFromUser(User user){
-
+        if(user == null) return null;
         return UserEntity.builder()
                 .id(user.getId())
                 .name(user.getName())
@@ -49,7 +46,7 @@ public class EntityConverter {
     }
 
     public User convertFromUserEntity(UserEntity userEntity){
-
+        if(userEntity == null) return null;
         return switch(userEntity.getRole()){
             case 0 -> convertFromStudentEntity((StudentInfoEntity) userEntity);
             case 1 -> convertFromTutorEntity((TutorInfoEntity) userEntity);
@@ -58,7 +55,7 @@ public class EntityConverter {
     }
 
     public Student convertFromStudentEntity(StudentInfoEntity studentInfoEntity){
-
+        if(studentInfoEntity == null) return null;
         return Student.builder()
                 .id(studentInfoEntity.getId())
                 .name(studentInfoEntity.getName())
@@ -69,13 +66,39 @@ public class EntityConverter {
                 .build();
     }
     public Tutor convertFromTutorEntity(TutorInfoEntity tutorInfoEntity){
-
+        if(tutorInfoEntity == null) return null;
         return Tutor.builder()
                 .id(tutorInfoEntity.getId())
                 .name(tutorInfoEntity.getName())
                 .email(tutorInfoEntity.getEmail())
                 .password(tutorInfoEntity.getPassword())
                 .profilePicURL(tutorInfoEntity.getProfilePicURL())
+                .build();
+    }
+
+    public BookingRequestEntity convertFromBookingRequest(BookingRequest sbr){
+        if(sbr == null) return null;
+        return BookingRequestEntity.builder()
+                .id(sbr.getId())
+                .requestType(sbr.getRequestType())
+                .requester(convertFromUser(sbr.getRequester()))
+                .receiver(convertFromUser(sbr.getReceiver()))
+                .bookingToSchedule(convertFromBooking(sbr.getBookingToSchedule()))
+                .bookingToReschedule(convertFromBooking(sbr.getBookingToReschedule()))
+                .answer(sbr.getAnswer())
+                .build();
+    }
+
+    public BookingRequest convertFromBookingRequestEntity(BookingRequestEntity sbre) {
+        if(sbre == null) return null;
+        return BookingRequest.builder()
+                .id(sbre.getId())
+                .requestType(sbre.getRequestType())
+                .requester(convertFromUserEntity(sbre.getRequester()))
+                .receiver(convertFromUserEntity(sbre.getReceiver()))
+                .bookingToSchedule(convertFromBookingEntity(sbre.getBookingToSchedule()))
+                .bookingToReschedule(convertFromBookingEntity(sbre.getBookingToReschedule()))
+                .answer(sbre.getAnswer())
                 .build();
     }
 }

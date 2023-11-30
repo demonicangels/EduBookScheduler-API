@@ -3,14 +3,13 @@ package com.smartbyte.edubookschedulerbackend.controller;
 import com.smartbyte.edubookschedulerbackend.business.BookingService;
 import com.smartbyte.edubookschedulerbackend.business.EmailService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
-import com.smartbyte.edubookschedulerbackend.business.request.CreateBookingRequest;
-import com.smartbyte.edubookschedulerbackend.business.request.RescheduleBookingRequest;
-import com.smartbyte.edubookschedulerbackend.business.request.SendEmailRequest;
-import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.*;
 import com.smartbyte.edubookschedulerbackend.business.response.*;
 import com.smartbyte.edubookschedulerbackend.domain.*;
+import com.smartbyte.edubookschedulerbackend.domain.BookingRequest;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,13 +77,13 @@ public class BookingController {
         User student = optStudent.get();
         User tutor = optTutor.get();
 
-        Booking newBooking = (Booking.builder()
+        Booking newBooking = Booking.builder()
                 .description(request.getDescription())
                 .tutor(tutor)
                 .student(student)
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
-                .build());
+                .build();
 
         Booking new2Booking = bookingService.createBooking2(newBooking, request.getDate());
 
@@ -96,21 +95,23 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/schedule")
-    ResponseEntity<Void>scheduleBooking(@RequestBody UpdateBookingStateRequest request){
+    @PostMapping("/schedule")
+    ResponseEntity<Void> scheduleBooking(@RequestBody @Valid ScheduleBookingRequest request){
         bookingService.scheduleBooking(request);
         return ResponseEntity.noContent().build();
     }
-    @PutMapping("/cancel")
-    ResponseEntity<Void>cancelBooking(@RequestBody UpdateBookingStateRequest request){
+    @PostMapping("/cancel")
+    ResponseEntity<Void> cancelBooking(@RequestBody UpdateBookingStateRequest request){
         bookingService.cancelBooking(request);
         return ResponseEntity.noContent().build();
-    }@PutMapping("/accept")
-    ResponseEntity<Void>acceptBooking(@RequestBody UpdateBookingStateRequest request){
+    }
+    @PostMapping("/accept")
+    ResponseEntity<Void> acceptBooking(@RequestBody AcceptBookingRequest request){
 
         bookingService.acceptBooking(request);
 
-        Booking booking = converter.convertFromBookingEntity(bookingRepository.findById(request.getBookingId()).get());
+        Booking booking = bookingService.getBookingRequestById(request.getBookingRequestId())
+                .map(r -> r.getBookingToSchedule()).get();
 
         Date date = booking.getDate();
         LocalDateTime inputDateTime = LocalDateTime.parse(date.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
@@ -130,35 +131,17 @@ public class BookingController {
 
         return ResponseEntity.noContent().build();
 
-    }@PutMapping("/finish")
+    }
+    @PostMapping("/finish")
     ResponseEntity<Void>finishBooking(@RequestBody UpdateBookingStateRequest request){
         bookingService.finishBooking(request);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping
-    ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
-        Optional<User> optStudent = userService.getUser(request.getStudentId());
-        if (optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-        Optional<User> optTutor = userService.getUser(request.getTutorId());
-        if (optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
+    @PostMapping("/reschedule")
+    ResponseEntity<Void> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
+        bookingService.rescheduleBooking(request);
 
-        Optional<Booking> optNewBooking = bookingService.rescheduleBooking(Booking.builder()
-                .id(request.getId())
-                .date(request.getDate())
-                .description(request.getDescription())
-//                        .student((Student)optStudent.get())
-//                        .tutor((Tutor)optTutor.get())
-                .build());
-        if (optNewBooking.isEmpty())
-            return ResponseEntity.unprocessableEntity().build();
-
-        Booking newBooking = optNewBooking.get();
-        RescheduleBookingResponse response = RescheduleBookingResponse.builder()
-                .booking(newBooking)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 }

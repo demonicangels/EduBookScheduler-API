@@ -64,5 +64,6 @@ public class Booking {
      */
 
     @NotNull
-    private State state;
+    @Builder.Default
+    private State state = State.Requested;
 }
