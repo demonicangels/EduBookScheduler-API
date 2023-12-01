@@ -10,21 +10,13 @@ plugins {
 group = 'com.smartbyte'
 version = '0.0.1-SNAPSHOT'
 
-sonar {
-    properties {
-        property "sonar.projectKey", "I508859_edubookschedulerbackend_AYwlZRqou1_G1-vj0bcI"
-        property "sonar.projectName", "EduBookSchedulerBackend"
-        property "sonar.qualitygate.wait", true
-        property "sonar.token","squ_cfa3835b6a49598acd89580cb8bd1538a6758f12"
-        property "sonar.test.inclusions","src/main/java/com/smartbyte/edubookschedulerbackend/business/impl/**"
-    }
-}
 
 java {
     sourceCompatibility = '17'
 }
 
     def applicationPropertiesFile = file('src/main/resources/application.properties')
+    def gradlePropertiesFile = file('gradle.properties')
 
 if (applicationPropertiesFile.exists()) {
     def properties = new Properties()
@@ -42,6 +34,28 @@ if (applicationPropertiesFile.exists()) {
 } else {
     throw new GradleException("application.properties file not found!")
 }
+
+if (gradlePropertiesFile.exists()) {
+    def gradleProperties = new Properties()
+    gradlePropertiesFile.withInputStream { inputStream ->
+        gradleProperties.load(inputStream)
+    }
+
+    // Configure SonarQube
+    sonar {
+        properties {
+            property "sonar.projectKey", "I508859_edubookschedulerbackend_AYwlZRqou1_G1-vj0bcI"
+            property "sonar.projectName", "EduBookSchedulerBackend"
+            property "sonar.qualitygate.wait", true
+            property "sonar.token",gradleProperties.getProperty("systemProp.sonar.token")
+            property "sonar.test.inclusions","src/main/java/com/smartbyte/edubookschedulerbackend/business/impl/**"
+        }
+    }
+} else {
+    throw new GradleException("gradle.properties file not found!")
+}
+
+
 
 configurations {
     compileOnly {
