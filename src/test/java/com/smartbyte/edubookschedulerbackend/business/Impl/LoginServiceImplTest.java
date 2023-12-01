@@ -1,6 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
-import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.InvalidPasswordException;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
@@ -22,18 +22,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class LoginUseCaseImplTest {
+class LoginServiceImplTest {
 
     @Mock
     private UserRepository userRepositoryMock;
     @Mock
     private EntityConverter converter;
     @InjectMocks
-    private LoginUseCaseImpl loginUseCase;
+    private LoginServiceImpl loginUseCase;
 
     /**
      * @verifies throw UserNotFoundException if email is invalid
-     * @see LoginUseCaseImpl#Login(com.smartbyte.edubookschedulerbackend.business.request.LoginRequest)
+     * @see LoginServiceImpl#Login(com.smartbyte.edubookschedulerbackend.business.request.LoginRequest)
      */
     @Test
     void Login_shouldThrowUserNotFoundExceptionIfEmailIsInvalid() {
@@ -52,7 +52,7 @@ class LoginUseCaseImplTest {
 
     /**
      * @verifies throw InvalidPasswordException if password is invalid
-     * @see LoginUseCaseImpl#Login(com.smartbyte.edubookschedulerbackend.business.request.LoginRequest)
+     * @see LoginServiceImpl#Login(com.smartbyte.edubookschedulerbackend.business.request.LoginRequest)
      */
     @Test
     void Login_shouldThrowInvalidPasswordExceptionIfPasswordIsInvalid() {
@@ -89,7 +89,7 @@ class LoginUseCaseImplTest {
 
     /**
      * @verifies return login response when request is valid
-     * @see LoginUseCaseImpl#Login(com.smartbyte.edubookschedulerbackend.business.request.LoginRequest)
+     * @see LoginServiceImpl#Login(com.smartbyte.edubookschedulerbackend.business.request.LoginRequest)
      */
     @Test
     void Login_shouldReturnLoginResponseWhenRequestIsValid() {
@@ -136,7 +136,7 @@ class LoginUseCaseImplTest {
 
     /**
      * @verifies throw InvalidPasswordException if password match but different case
-     * @see LoginUseCaseImpl#Login(LoginRequest)
+     * @see LoginServiceImpl#Login(LoginRequest)
      */
     @Test
     void Login_shouldThrowInvalidPasswordExceptionIfPasswordMatchButDifferentCase() {

@@ -1,4 +1,4 @@
-package com.smartbyte.edubookschedulerbackend.business;
+package com.smartbyte.edubookschedulerbackend.persistence.jpa.entity;
 
 import com.smartbyte.edubookschedulerbackend.domain.*;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntity;

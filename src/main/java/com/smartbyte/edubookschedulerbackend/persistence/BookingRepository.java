@@ -26,5 +26,4 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
     @Query("UPDATE BookingEntity SET state=:booking_state WHERE id=:booking_id")
     void updateBookingState(@Param("booking_id") long bookingId, @Param("booking_state") Integer bookingState);
 
-
 }
