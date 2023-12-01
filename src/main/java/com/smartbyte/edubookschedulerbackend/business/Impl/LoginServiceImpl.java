@@ -1,13 +1,13 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
-import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
-import com.smartbyte.edubookschedulerbackend.business.LoginUseCase;
+import com.smartbyte.edubookschedulerbackend.business.LoginService;
 import com.smartbyte.edubookschedulerbackend.business.exception.InvalidPasswordException;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.LoginResponse;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class LoginUseCaseImpl implements LoginUseCase {
+public class LoginServiceImpl implements LoginService {
     private final UserRepository userRepository;
     private final EntityConverter entityConverter;
 

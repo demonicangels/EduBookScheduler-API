@@ -1,19 +1,23 @@
 package com.smartbyte.edubookschedulerbackend.controller;
 
 import com.smartbyte.edubookschedulerbackend.business.BookingService;
+import com.smartbyte.edubookschedulerbackend.business.EmailService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.request.CreateBookingRequest;
 import com.smartbyte.edubookschedulerbackend.business.request.RescheduleBookingRequest;
-import com.smartbyte.edubookschedulerbackend.business.response.CreateBookingResponse;
-import com.smartbyte.edubookschedulerbackend.business.response.GetBookingByIdResponse;
-import com.smartbyte.edubookschedulerbackend.business.response.GetUsersBookingResponse;
-import com.smartbyte.edubookschedulerbackend.business.response.RescheduleBookingResponse;
+import com.smartbyte.edubookschedulerbackend.business.request.SendEmailRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
+import com.smartbyte.edubookschedulerbackend.business.response.*;
 import com.smartbyte.edubookschedulerbackend.domain.*;
+import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +29,9 @@ import java.util.Optional;
 public class BookingController {
     private final BookingService bookingService;
     private final UserService userService;
+    private final EmailService emailService;
+    private final EntityConverter converter;
+    private final BookingRepository bookingRepository;
 
     @GetMapping("/{id}")
     ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id) {
@@ -51,6 +58,12 @@ public class BookingController {
                 .build();
         return ResponseEntity.ok(response);
 
+    }
+
+    @GetMapping("upcoming/{studentId}")
+    ResponseEntity<List<GetUpcomingBookingsResponse>>getUpcomingBookings
+            (@PathVariable(value = "studentId")long studentId){
+        return ResponseEntity.ok(bookingService.getUpcomingBookings(studentId));
     }
 
     @PostMapping("/add")
@@ -81,8 +94,46 @@ public class BookingController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/schedule")
+    ResponseEntity<Void>scheduleBooking(@RequestBody UpdateBookingStateRequest request){
+        bookingService.scheduleBooking(request);
+        return ResponseEntity.noContent().build();
+    }
+    @PutMapping("/cancel")
+    ResponseEntity<Void>cancelBooking(@RequestBody UpdateBookingStateRequest request){
+        bookingService.cancelBooking(request);
+        return ResponseEntity.noContent().build();
+    }@PutMapping("/accept")
+    ResponseEntity<Void>acceptBooking(@RequestBody UpdateBookingStateRequest request){
+
+        bookingService.acceptBooking(request);
+
+        Booking booking = converter.convertFromBookingEntity(bookingRepository.findById(request.getBookingId()).get());
+
+        Date date = booking.getDate();
+        LocalDateTime inputDateTime = LocalDateTime.parse(date.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("y-M-d");
+
+        String tutor = booking.getTutor().getName();
+        String about = booking.getDescription();
 
 
+        SendEmailRequest emailRequest = SendEmailRequest.builder()
+                .message("Confirmation for booking with " + tutor +
+                        " on " + inputDateTime.format(outputFormatter) +
+                        ". Description of the booking: " + about)
+                .build();
+
+        emailService.sendEmail(emailRequest);
+
+        return ResponseEntity.noContent().build();
+
+    }@PutMapping("/finish")
+    ResponseEntity<Void>finishBooking(@RequestBody UpdateBookingStateRequest request){
+        bookingService.finishBooking(request);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping

@@ -1,6 +1,5 @@
 package com.smartbyte.edubookschedulerbackend.domain;
 
-import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -51,4 +50,19 @@ public class Booking {
 
     @NotNull
     private User tutor;
+
+    /*
+     * State
+     * 0 = Requested
+     * 1 = Scheduled
+     * 2 = Cancelled
+     * 3 = Missed
+     * 4 = Finished
+     * 5 = Tutor_Reschedule_Requested
+     * 6 = Student_Reschedule_Requested
+     * 7 = Rescheduled
+     */
+
+    @NotNull
+    private State state;
 }

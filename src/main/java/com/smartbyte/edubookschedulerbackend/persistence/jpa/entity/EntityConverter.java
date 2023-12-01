@@ -1,11 +1,10 @@
-package com.smartbyte.edubookschedulerbackend.business;
+package com.smartbyte.edubookschedulerbackend.persistence.jpa.entity;
 
 import com.smartbyte.edubookschedulerbackend.domain.*;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.StudentInfoEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.TutorInfoEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,24 +12,28 @@ public class EntityConverter {
     public BookingEntity convertFromBooking(Booking booking){
 
          return BookingEntity.builder()
+                 .id(booking.getId())
                  .date(booking.getDate())
                  .startTime(booking.getStartTime())
                  .endTime(booking.getEndTime())
                  .description(booking.getDescription())
                  .student(convertFromUser(booking.getStudent()))
                  .tutor(convertFromUser(booking.getTutor()))
+                 .state(booking.getState().getStateId())
                  .build();
     }
 
     public Booking convertFromBookingEntity(BookingEntity bookingEntity){
 
         return Booking.builder()
+                .id(bookingEntity.getId())
                 .date(bookingEntity.getDate())
                 .startTime(bookingEntity.getStartTime())
                 .endTime(bookingEntity.getEndTime())
                 .description(bookingEntity.getDescription())
                 .student(convertFromUserEntity(bookingEntity.getStudent()))
                 .tutor(convertFromUserEntity(bookingEntity.getTutor()))
+                .state(State.fromStateId(bookingEntity.getState()))
                 .build();
     }
     public UserEntity convertFromUser(User user){

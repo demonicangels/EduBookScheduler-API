@@ -1,6 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
-import com.smartbyte.edubookschedulerbackend.business.EntityConverter;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
 import com.smartbyte.edubookschedulerbackend.domain.Role;
