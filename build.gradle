@@ -23,7 +23,7 @@ java {
     sourceCompatibility = '17'
 }
 
-def applicationPropertiesFile = file('src/main/resources/application.properties')
+    def applicationPropertiesFile = file('src/main/resources/application.properties')
 
 if (applicationPropertiesFile.exists()) {
     def properties = new Properties()
@@ -58,6 +58,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.flywaydb:flyway-core'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'mysql:mysql-connector-java:8.0.23'
     implementation 'org.flywaydb:flyway-mysql:8.4.4'
     compileOnly 'org.projectlombok:lombok'

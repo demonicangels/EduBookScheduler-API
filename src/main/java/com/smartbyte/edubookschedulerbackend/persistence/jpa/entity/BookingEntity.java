@@ -39,18 +39,35 @@ public class BookingEntity {
     @NotNull
     @Column(name = "startTime")
     @Min(0)
-    @Max(1439)
+    @Max(9999)
     private Integer startTime;
 
     @NotNull
     @Column(name = "endTime")
     @Min(0)
-    @Max(1439)
+    @Max(9999)
     private Integer endTime;
 
     @NotEmpty
     @Column(name = "description")
     private String description;
+
+
+    /*
+     * State
+     * 0 = Requested
+     * 1 = Scheduled
+     * 2 = Cancelled
+     * 3 = Missed
+     * 4 = Finished
+     * 5 = Tutor_Reschedule_Requested
+     * 6 = Student_Reschedule_Requested
+     * 7 = Rescheduled
+     */
+
+    @NotNull
+    @Column(name = "state")
+    private Integer state;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "student_id")
