@@ -27,8 +27,5 @@ sonarqube-check:
 #   - .sonar/cache
  script: ./gradlew test sonar
  allow_failure: true
-# only:
-#  - merge_requests
-#  - master
-#  - main
-#  - develop
+only:
+  - master
