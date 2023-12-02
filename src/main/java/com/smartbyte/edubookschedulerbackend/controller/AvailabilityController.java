@@ -24,7 +24,7 @@ public class AvailabilityController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/tutorName/{id}")
     ResponseEntity<GetTutorsNameResponse> getTutorsName(@PathVariable("id") long id){
         GetTutorsNameResponse response = availabilityService.GetTutorsName(id);
         return ResponseEntity.ok(response);
@@ -36,8 +36,8 @@ public class AvailabilityController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/GetTutorAvailability")
-    ResponseEntity<GetAvailabilityTutorResponse> getTutorAvailability(@RequestBody int id){
+    @GetMapping("/tutorBookings/{id}")
+    ResponseEntity<GetAvailabilityTutorResponse> getTutorAvailability(@PathVariable("id") long id){
         GetAvailabilityTutorResponse response = availabilityService.getTutorsBooking(id);
         return ResponseEntity.ok(response);
     }
