@@ -136,7 +136,7 @@ public class BookingController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping
+    @PutMapping("")
     ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
         Optional<User> optStudent = userService.getUser(request.getStudentId());
         if (optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)

@@ -1,6 +1,7 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.AvailabilityService;
+import com.smartbyte.edubookschedulerbackend.business.response.GetTutorsNameResponse;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.GetAvailabilityRequest;
@@ -73,6 +74,18 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 .users(tutors)
                 .build();
         return response;
+    }
+
+    @Override
+    public GetTutorsNameResponse GetTutorsName(long id) {
+        Optional<UserEntity> user =userRepository.getUserById(id);
+        if(user.isPresent()){
+        String response = user.get().getName();
+        return GetTutorsNameResponse.builder()
+                .name(response)
+                .build();
+        }
+        return null;
     }
 
     @Override
