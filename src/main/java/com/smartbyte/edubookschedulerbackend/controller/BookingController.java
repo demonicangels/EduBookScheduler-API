@@ -103,7 +103,25 @@ public class BookingController {
     }
     @PutMapping("/cancel")
     ResponseEntity<Void>cancelBooking(@RequestBody UpdateBookingStateRequest request){
+
+        Booking booking = bookingService.getBookingById(request.getBookingId()).get();
+
+        Date date = booking.getDate();
+        LocalDateTime inputDateTime = LocalDateTime.parse(date.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("y-M-d");
+
+        String tutor = booking.getTutor().getName();
+        String about = booking.getDescription();
+
+
+        SendEmailRequest emailRequest = SendEmailRequest.builder()
+                .message("Booking with " + tutor +
+                        " on " + inputDateTime.format(outputFormatter) +
+                        ". Description of the booking: " + about + "has been canceled. The tutor isn't available at this time. Please reschedule.")
+                .build();
+
         bookingService.cancelBooking(request);
+
         return ResponseEntity.noContent().build();
     }@PutMapping("/accept")
     ResponseEntity<Void>acceptBooking(@RequestBody UpdateBookingStateRequest request){
