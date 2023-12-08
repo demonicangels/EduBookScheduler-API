@@ -2,9 +2,11 @@ package com.smartbyte.edubookschedulerbackend.controller;
 
 import com.smartbyte.edubookschedulerbackend.business.LoginService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
+import com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest;
 import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
 import com.smartbyte.edubookschedulerbackend.business.response.LoginResponse;
+import com.smartbyte.edubookschedulerbackend.domain.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,11 @@ public class UserController {
     @PostMapping(value = "login")
     ResponseEntity<LoginResponse> Login(@RequestBody LoginRequest request){
         return ResponseEntity.ok(loginService.Login(request));
+    }
+
+    @PostMapping(value = "register")
+    ResponseEntity<User> Register(@RequestBody CreateUserRequest request){
+        return ResponseEntity.ok(userService.createUser(request));
     }
 
     @GetMapping("{id}")

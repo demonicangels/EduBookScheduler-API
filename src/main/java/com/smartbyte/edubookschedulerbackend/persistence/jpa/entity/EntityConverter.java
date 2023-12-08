@@ -53,6 +53,7 @@ public class EntityConverter {
         return switch(userEntity.getRole()){
             case 0 -> convertFromStudentEntity((StudentInfoEntity) userEntity);
             case 1 -> convertFromTutorEntity((TutorInfoEntity) userEntity);
+            case 2 -> convertFromAdminEntity((AdminInfoEntity) userEntity);
             default -> throw new IllegalArgumentException("Unsupported user type");
         };
     }
@@ -78,4 +79,16 @@ public class EntityConverter {
                 .profilePicURL(tutorInfoEntity.getProfilePicURL())
                 .build();
     }
+
+    public Admin convertFromAdminEntity(AdminInfoEntity adminInfoEntity){
+
+        return Admin.builder()
+                .id(adminInfoEntity.getId())
+                .name(adminInfoEntity.getName())
+                .email(adminInfoEntity.getEmail())
+                .password(adminInfoEntity.getPassword())
+                .profilePicURL(adminInfoEntity.getProfilePicURL())
+                .build();
+    }
+
 }
