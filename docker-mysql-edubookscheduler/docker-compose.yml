@@ -1,0 +1,9 @@
+# TODO: Volume so the db persists restarts.
+services:
+  mysql:
+    image: mysql
+    ports:
+      - 127.0.0.1:3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: edubook
