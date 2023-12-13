@@ -29,6 +29,8 @@ public interface BookingService {
     void finishBooking(UpdateBookingStateRequest request);
 
     Optional<BookingRequest> getBookingRequestById(long id);
+    List<BookingRequest> getSentBookingRequests(User user);
+    List<BookingRequest> getReceivedBookingRequests(User user);
 
 
 }

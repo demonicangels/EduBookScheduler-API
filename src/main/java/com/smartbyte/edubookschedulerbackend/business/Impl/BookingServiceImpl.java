@@ -170,10 +170,10 @@ public class BookingServiceImpl implements BookingService {
                         "Receiver doesn't exist"
                         )
                 );
-        // requester can only be a tutor and receiver a student for now
-        if(!(requester.getRole() == Role.Tutor && receiver.getRole() == Role.Student)){
+        // requester can only be a student and receiver a tutor for now
+        if(!(requester.getRole() == Role.Student && receiver.getRole() == Role.Tutor)){
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Requestor should be a tutor and receiver a student");
+                    "Requester should be a tutor and receiver a student");
         }
 
 
@@ -182,8 +182,8 @@ public class BookingServiceImpl implements BookingService {
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
                 .description(request.getDescription())
-                .tutor(requester)
-                .student(receiver)
+                .tutor(receiver)
+                .student(requester)
                 .state(State.Requested)
                 .build();
         BookingRequest bookingRequest = BookingRequest.builder()
@@ -202,7 +202,7 @@ public class BookingServiceImpl implements BookingService {
         User requester = userService.getUser(request.getRequesterId())
                 .orElseThrow(() -> new ResponseStatusException(
                                 HttpStatus.UNPROCESSABLE_ENTITY,
-                                "Requestor doesn't exist"
+                                "Requester doesn't exist"
                         )
                 );
         User receiver = userService.getUser(request.getReceiverId())
@@ -220,15 +220,22 @@ public class BookingServiceImpl implements BookingService {
 
         updateBookingState(rescheduledBooking.getId(), State.Reschedule_Requested);
 
-        Booking schedBooking = Booking.builder()
+        Booking.BookingBuilder bookingBuilder = Booking.builder()
                 .date(request.getDate())
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
                 .description(request.getDescription())
-                .tutor(requester)
-                .student(receiver)
-                .state(State.Reschedule_Wait_Accept)
-                .build();
+                .state(State.Reschedule_Wait_Accept);
+
+        if(requester.getRole() == Role.Student){
+            bookingBuilder.student(requester);
+            bookingBuilder.tutor(receiver);
+        } else if (requester.getRole() == Role.Tutor) {
+            bookingBuilder.student(receiver);
+            bookingBuilder.tutor(requester);
+        }
+
+        Booking schedBooking = bookingBuilder.build();
         BookingRequest bookingRequest = BookingRequest.builder()
                 .requestType(BookingRequestType.Reschedule)
                 .requester(requester)
@@ -311,6 +318,18 @@ public class BookingServiceImpl implements BookingService {
     public Optional<BookingRequest> getBookingRequestById(long id) {
          return bookingRequestRepo.findById(id)
                  .map(converter::convertFromBookingRequestEntity);
+    }
+
+    @Override
+    public List<BookingRequest> getSentBookingRequests(User user) {
+        return bookingRequestRepo.findBookingRequestsEntitiesByRequester(converter.convertFromUser(user))
+                .stream().map(converter::convertFromBookingRequestEntity).toList();
+    }
+
+    @Override
+    public List<BookingRequest> getReceivedBookingRequests(User user) {
+        return bookingRequestRepo.findBookingRequestsEntitiesByReceiver(converter.convertFromUser(user))
+                .stream().map(converter::convertFromBookingRequestEntity).toList();
     }
 
     @Transactional

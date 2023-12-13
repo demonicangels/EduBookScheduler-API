@@ -16,8 +16,6 @@ import java.util.Date;
 @Builder
 public class RescheduleBookingRequest {
     @NotNull
-    private Long id;
-    @NotNull
     private Date date;
     @NotNull
     @Min(0)

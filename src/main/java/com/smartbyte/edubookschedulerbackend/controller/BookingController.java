@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,8 +30,6 @@ public class BookingController {
     private final BookingService bookingService;
     private final UserService userService;
     private final EmailService emailService;
-    private final EntityConverter converter;
-    private final BookingRepository bookingRepository;
 
     @GetMapping("/{id}")
     ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id) {
@@ -63,36 +62,6 @@ public class BookingController {
     ResponseEntity<List<GetUpcomingBookingsResponse>>getUpcomingBookings
             (@PathVariable(value = "studentId")long studentId){
         return ResponseEntity.ok(bookingService.getUpcomingBookings(studentId));
-    }
-
-    @PostMapping("/add")
-    ResponseEntity<CreateBookingResponse> createBooking(@RequestBody CreateBookingRequest request) {
-        Optional<User> optStudent = userService.getUser(request.getStudentId());
-        if (optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-        Optional<User> optTutor = userService.getTutorByName(request.getTutorName());
-        if (optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-
-        User student = optStudent.get();
-        User tutor = optTutor.get();
-
-        Booking newBooking = Booking.builder()
-                .description(request.getDescription())
-                .tutor(tutor)
-                .student(student)
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .build();
-
-        Booking new2Booking = bookingService.createBooking2(newBooking, request.getDate());
-
-
-        CreateBookingResponse response = CreateBookingResponse.builder()
-                .booking(new2Booking)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/schedule")
@@ -143,5 +112,21 @@ public class BookingController {
         bookingService.rescheduleBooking(request);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/request/sentby/{id}")
+    ResponseEntity<List<BookingRequest>> getRequestsSentBy(@PathVariable("id") long userId){
+        User user = userService.getUser(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return ResponseEntity.ok(bookingService.getSentBookingRequests(user));
+    }
+
+    @GetMapping("/request/receivedby/{id}")
+    ResponseEntity<List<BookingRequest>> getRequestsReceivedBy(@PathVariable("id") long userId){
+        User user = userService.getUser(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return ResponseEntity.ok(bookingService.getReceivedBookingRequests(user));
     }
 }
