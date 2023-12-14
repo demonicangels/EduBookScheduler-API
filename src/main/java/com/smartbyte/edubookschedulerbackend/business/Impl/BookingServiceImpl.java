@@ -42,10 +42,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRequestRepository bookingRequestRepo;
     @PersistenceContext
     private EntityManager entityManager;
-    public Optional<Booking> createBooking(Booking booking) {
-        return Optional.of(converter.convertFromBookingEntity(bookingRepository.save(converter.convertFromBooking(booking))));
-    }
-
     /**
      *
      * @param studentId student's id
@@ -122,37 +118,6 @@ public class BookingServiceImpl implements BookingService {
         return bookings;
     }
 
-    @Override
-    public void cancelAppointment(Booking booking) {
-        bookingRepository.delete(converter.convertFromBooking(booking));
-    }
-
-    @Override
-    @Transactional(rollbackOn = Exception.class)
-    public Booking createBooking2(Booking booking, String Date) {
-        try {
-            Date date = convertStringToDate(Date);
-            booking.setDate(date);
-            UserEntity student = converter.convertFromUser(booking.getStudent());
-            UserEntity tutor = converter.convertFromUser(booking.getTutor());
-            BookingEntity data = BookingEntity.builder()
-                    .date(booking.getDate())
-                    .description(booking.getDescription())
-                    .startTime(booking.getStartTime())
-                    .endTime(booking.getEndTime())
-                    .student(student)
-                    .tutor(tutor)
-                    .state(0)
-                    .build();
-            BookingEntity dataEntity = bookingRepository.save(entityManager.merge(data));
-            Booking dataDomain = converter.convertFromBookingEntity(dataEntity);
-            return dataDomain;
-        } catch (Exception e) {
-            // Log the exception or print its stack trace to identify the issue
-            e.printStackTrace();
-            throw new RuntimeException("Error creating booking", e);
-        }
-    }
 
     @Override
     @Transactional
@@ -352,17 +317,6 @@ public class BookingServiceImpl implements BookingService {
         }
 
         bookingRepository.updateBookingState(bookingId, newState.getStateId());
-    }
-
-
-    private Date convertStringToDate(String dateString) {
-        try {
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-            return inputFormat.parse(dateString);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
 }
