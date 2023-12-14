@@ -12,8 +12,10 @@ import com.smartbyte.edubookschedulerbackend.domain.*;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -32,6 +34,9 @@ public class BookingController {
     private final EmailService emailService;
     private final EntityConverter converter;
     private final BookingRepository bookingRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/{id}")
     ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id) {
@@ -99,11 +104,23 @@ public class BookingController {
     @PutMapping("/schedule")
     ResponseEntity<Void>scheduleBooking(@RequestBody UpdateBookingStateRequest request){
         bookingService.scheduleBooking(request);
+
+        Booking book = bookingService.getBookingById(request.getBookingId()).get();
+        String msg = String.format("New booking with tutor %s was scheduled for %s",book.getTutor(),book.getDate());
+
+        messagingTemplate.convertAndSend("/topic/notification", msg);
+
         return ResponseEntity.noContent().build();
     }
     @PutMapping("/cancel")
     ResponseEntity<Void>cancelBooking(@RequestBody UpdateBookingStateRequest request){
         bookingService.cancelBooking(request);
+
+        Booking book = bookingService.getBookingById(request.getBookingId()).get();
+        String msg = String.format("Your booking with tutor %s for %s was cancelled.",book.getTutor(),book.getDate().toString());
+
+        messagingTemplate.convertAndSend("/topic/notification", msg);
+
         return ResponseEntity.noContent().build();
     }@PutMapping("/accept")
     ResponseEntity<Void>acceptBooking(@RequestBody UpdateBookingStateRequest request){
