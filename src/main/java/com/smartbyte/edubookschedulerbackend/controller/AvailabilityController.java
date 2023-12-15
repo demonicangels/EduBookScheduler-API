@@ -1,6 +1,7 @@
 package com.smartbyte.edubookschedulerbackend.controller;
 
 import com.smartbyte.edubookschedulerbackend.business.AvailabilityService;
+import com.smartbyte.edubookschedulerbackend.business.request.CreateSetAvailabilityRequest;
 import com.smartbyte.edubookschedulerbackend.business.request.GetAvailabilityRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.*;
 
@@ -17,6 +18,12 @@ import java.util.List;
 @CrossOrigin(origins = {"http://localhost:5173","http://localhost:4173", "http://localhost:5174"})
 public class AvailabilityController {
     private final AvailabilityService availabilityService;
+
+    @PostMapping("/createAvailability")
+    ResponseEntity<List<CreateSetAvailabilityResponse>> createAvailabilityOfTutor(@RequestBody List<CreateSetAvailabilityRequest> requests){
+        List<CreateSetAvailabilityResponse>response = availabilityService.createAvailability(requests);
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/getTutor")
     ResponseEntity<List<GetAvailabilityResponse>> getAvailabilityOfTeachers(@RequestBody GetAvailabilityRequest request){
@@ -41,4 +48,11 @@ public class AvailabilityController {
         GetAvailabilityTutorResponse response = availabilityService.getTutorsBooking(id);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/tutorAvailabilityWeekly/{id}")
+    ResponseEntity<List<GetSetAvailabilityResponse>> getAvailabilityOfTutorWeekly(@PathVariable("id") long id){
+        List<GetSetAvailabilityResponse> response = availabilityService.getAvailabilityOfTutorWeekly(id);
+        return ResponseEntity.ok(response);
+    }
+
 }
