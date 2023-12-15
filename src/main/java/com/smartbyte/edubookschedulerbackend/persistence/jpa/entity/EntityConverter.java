@@ -36,6 +36,29 @@ public class EntityConverter {
                 .state(State.fromStateId(bookingEntity.getState()))
                 .build();
     }
+
+    public AvailabilityEntity convertFromAvailabilityDomain(AvailabilityDomain availabilityDomain){
+
+        return AvailabilityEntity.builder()
+                .id(availabilityDomain.getId())
+                .date(availabilityDomain.getDate())
+                .startTime(availabilityDomain.getStartTime())
+                .endTime(availabilityDomain.getEndTime())
+                .tutor(convertFromUser(availabilityDomain.getTutor()))
+                .build();
+    }
+
+    public AvailabilityDomain convertFromAvailabilityEntity(AvailabilityEntity availabilityEntity){
+
+        return AvailabilityDomain.builder()
+                .id(availabilityEntity.getId())
+                .date(availabilityEntity.getDate())
+                .startTime(availabilityEntity.getStartTime())
+                .endTime(availabilityEntity.getEndTime())
+                .tutor(convertFromUserEntity(availabilityEntity.getTutor()))
+                .build();
+    }
+
     public UserEntity convertFromUser(User user){
 
         return UserEntity.builder()

@@ -24,9 +24,11 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 @Service
 @RequiredArgsConstructor
@@ -130,7 +132,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(rollbackOn = Exception.class)
     public Booking createBooking2(Booking booking, String Date) {
         try {
-            Date date = convertStringToDate(Date);
+            Date date = convertStringToDateWithTimeZone(Date);
             booking.setDate(date);
             UserEntity student = converter.convertFromUser(booking.getStudent());
             UserEntity tutor = converter.convertFromUser(booking.getTutor());
@@ -200,14 +202,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
-    private Date convertStringToDate(String dateString) {
-        try {
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-            return inputFormat.parse(dateString);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
-        }
+    private Date convertStringToDateWithTimeZone(String dateStr) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        Instant instant = Instant.from(formatter.parse(dateStr));
+        return Date.from(instant);
     }
 
 }
