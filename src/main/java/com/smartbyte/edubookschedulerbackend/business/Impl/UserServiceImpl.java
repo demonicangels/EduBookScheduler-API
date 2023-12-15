@@ -1,5 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
+import com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
@@ -22,8 +23,12 @@ public class UserServiceImpl implements UserService {
     private final EntityConverter converter;
 
     @Override
-    public User createUser(User user) {
-        return converter.convertFromUserEntity(userRepository.save(converter.convertFromUser(user)));
+    public User createUser(CreateUserRequest request) {
+
+        UserEntity user = saveUser(request);
+        userRepository.save(user);
+
+        return converter.convertFromUserEntity(user);
     }
 
     @Override
@@ -90,4 +95,26 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findByNameAndRole(name,1);
         return Optional.of(converter.convertFromUserEntity(user));
     }
+
+    private UserEntity saveUser(CreateUserRequest request) {
+
+        Integer roleInt = 0;
+
+        if (request.getRole().equals("Tutor"))
+        {
+            roleInt = 1;
+        }
+        else if (request.getRole().equals("Student"))
+    {
+            roleInt= 0;
+        }
+
+        return UserEntity.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .profilePicURL(request.getProfilePicURL())
+                .role(roleInt)
+                .build();
+  }
 }

@@ -1,11 +1,10 @@
 package com.smartbyte.edubookschedulerbackend.controller;
 
 import com.smartbyte.edubookschedulerbackend.business.AvailabilityService;
+import com.smartbyte.edubookschedulerbackend.business.request.CreateSetAvailabilityRequest;
 import com.smartbyte.edubookschedulerbackend.business.request.GetAvailabilityRequest;
-import com.smartbyte.edubookschedulerbackend.business.response.GetAvailabilityResponse;
+import com.smartbyte.edubookschedulerbackend.business.response.*;
 
-import com.smartbyte.edubookschedulerbackend.business.response.GetAvailabilityTutorResponse;
-import com.smartbyte.edubookschedulerbackend.business.response.GetUsersResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +19,21 @@ import java.util.List;
 public class AvailabilityController {
     private final AvailabilityService availabilityService;
 
+    @PostMapping("/createAvailability")
+    ResponseEntity<List<CreateSetAvailabilityResponse>> createAvailabilityOfTutor(@RequestBody List<CreateSetAvailabilityRequest> requests){
+        List<CreateSetAvailabilityResponse>response = availabilityService.createAvailability(requests);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/getTutor")
     ResponseEntity<List<GetAvailabilityResponse>> getAvailabilityOfTeachers(@RequestBody GetAvailabilityRequest request){
         List<GetAvailabilityResponse>response = availabilityService.findAvailableTeachersByDateAndTime(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/tutorName/{id}")
+    ResponseEntity<GetTutorsNameResponse> getTutorsName(@PathVariable("id") long id){
+        GetTutorsNameResponse response = availabilityService.GetTutorsName(id);
         return ResponseEntity.ok(response);
     }
 
@@ -32,9 +43,16 @@ public class AvailabilityController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/GetTutorAvailability")
-    ResponseEntity<GetAvailabilityTutorResponse> getTutorAvailability(@RequestBody int id){
+    @GetMapping("/tutorBookings/{id}")
+    ResponseEntity<GetAvailabilityTutorResponse> getTutorAvailability(@PathVariable("id") long id){
         GetAvailabilityTutorResponse response = availabilityService.getTutorsBooking(id);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/tutorAvailabilityWeekly/{id}")
+    ResponseEntity<List<GetSetAvailabilityResponse>> getAvailabilityOfTutorWeekly(@PathVariable("id") long id){
+        List<GetSetAvailabilityResponse> response = availabilityService.getAvailabilityOfTutorWeekly(id);
+        return ResponseEntity.ok(response);
+    }
+
 }

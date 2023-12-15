@@ -9,4 +9,5 @@ import lombok.Setter;
 @Setter
 public class SendEmailRequest {
     private final String message;
+    private final String subject;
 }

@@ -13,6 +13,8 @@ public class CreateUserRequest {
     String email;
     @NotBlank
     String password;
+    @NotBlank
+    String profilePicURL;
     @NonNull
     Role role;
 }

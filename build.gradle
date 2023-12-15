@@ -12,9 +12,11 @@ version = '0.0.1-SNAPSHOT'
 
 sonar {
     properties {
-        property "sonar.projectKey", "I508859_edubookschedulerbackend_AYuV2indVuR86IZV8Em_"
+        property "sonar.projectKey", "I508859_edubookschedulerbackend_AYwlZRqou1_G1-vj0bcI"
         property "sonar.projectName", "EduBookSchedulerBackend"
         property "sonar.qualitygate.wait", true
+        property "sonar.token","squ_cfa3835b6a49598acd89580cb8bd1538a6758f12"
+        property "sonar.inclusions","src/main/**/business/Impl/**/*"
     }
 }
 

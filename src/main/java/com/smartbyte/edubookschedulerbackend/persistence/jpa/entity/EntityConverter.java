@@ -33,6 +33,29 @@ public class EntityConverter {
                 .state(State.fromStateId(bookingEntity.getState()))
                 .build();
     }
+
+    public AvailabilityEntity convertFromAvailabilityDomain(AvailabilityDomain availabilityDomain){
+
+        return AvailabilityEntity.builder()
+                .id(availabilityDomain.getId())
+                .date(availabilityDomain.getDate())
+                .startTime(availabilityDomain.getStartTime())
+                .endTime(availabilityDomain.getEndTime())
+                .tutor(convertFromUser(availabilityDomain.getTutor()))
+                .build();
+    }
+
+    public AvailabilityDomain convertFromAvailabilityEntity(AvailabilityEntity availabilityEntity){
+
+        return AvailabilityDomain.builder()
+                .id(availabilityEntity.getId())
+                .date(availabilityEntity.getDate())
+                .startTime(availabilityEntity.getStartTime())
+                .endTime(availabilityEntity.getEndTime())
+                .tutor(convertFromUserEntity(availabilityEntity.getTutor()))
+                .build();
+    }
+
     public UserEntity convertFromUser(User user){
         if(user == null) return null;
         return UserEntity.builder()
@@ -50,6 +73,7 @@ public class EntityConverter {
         return switch(userEntity.getRole()){
             case 0 -> convertFromStudentEntity((StudentInfoEntity) userEntity);
             case 1 -> convertFromTutorEntity((TutorInfoEntity) userEntity);
+            case 2 -> convertFromAdminEntity((AdminInfoEntity) userEntity);
             default -> throw new IllegalArgumentException("Unsupported user type");
         };
     }
@@ -73,6 +97,17 @@ public class EntityConverter {
                 .email(tutorInfoEntity.getEmail())
                 .password(tutorInfoEntity.getPassword())
                 .profilePicURL(tutorInfoEntity.getProfilePicURL())
+                .build();
+    }
+
+    public Admin convertFromAdminEntity(AdminInfoEntity adminInfoEntity){
+
+        return Admin.builder()
+                .id(adminInfoEntity.getId())
+                .name(adminInfoEntity.getName())
+                .email(adminInfoEntity.getEmail())
+                .password(adminInfoEntity.getPassword())
+                .profilePicURL(adminInfoEntity.getProfilePicURL())
                 .build();
     }
 
