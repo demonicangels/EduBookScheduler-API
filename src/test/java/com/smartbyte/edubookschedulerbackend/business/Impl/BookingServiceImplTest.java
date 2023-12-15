@@ -1,5 +1,8 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
+import com.smartbyte.edubookschedulerbackend.domain.Booking;
+import com.smartbyte.edubookschedulerbackend.domain.Role;
+import com.smartbyte.edubookschedulerbackend.domain.Tutor;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
@@ -92,23 +95,29 @@ import static org.mockito.Mockito.when;
 
         when(userRepository.getUserById(student.getId())).thenReturn(Optional.of(student));
 
-        UserEntity tutor=UserEntity.builder()
+        UserEntity tutorEntity=UserEntity.builder()
                 .id(2L)
                 .role(1)
+                .name("tutor")
+                .build();
+
+        Tutor tutor=Tutor.builder()
+                .id(2L)
+                .role(Role.Tutor)
                 .name("tutor")
                 .build();
         LocalDate currentDate=LocalDate.now();
 
         List<BookingEntity>bookings=List.of(BookingEntity.builder()
                 .id(1L)
-                .tutor(tutor)
+                .tutor(tutorEntity)
                 .startTime(1439)
                 .description("meeting")
                 .date(new Date())
                 .build(),
                 BookingEntity.builder()
                         .id(2L)
-                        .tutor(tutor)
+                        .tutor(tutorEntity)
                         .startTime(1439)
                         .description("meeting 2")
                         .date(new Date())
@@ -118,6 +127,23 @@ import static org.mockito.Mockito.when;
         when(bookingRepository.getUpcomingBookings(
                 Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), student)
         ).thenReturn(bookings);
+
+        when(converter.convertFromBookingEntity(bookings.get(0))).thenReturn(Booking.builder()
+                .id(bookings.get(0).getId())
+                .description(bookings.get(0).getDescription())
+                .tutor(tutor)
+                .startTime(bookings.get(0).getStartTime())
+                .date(bookings.get(0).getDate())
+                .build()
+        );
+        when(converter.convertFromBookingEntity(bookings.get(1))).thenReturn(Booking.builder()
+                .id(bookings.get(1).getId())
+                .description(bookings.get(1).getDescription())
+                .tutor(tutor)
+                .date(bookings.get(1).getDate())
+                .startTime(bookings.get(1).getStartTime())
+                .build()
+        );
 
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd");
 
