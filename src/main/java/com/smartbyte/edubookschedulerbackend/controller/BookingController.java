@@ -11,8 +11,10 @@ import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +32,9 @@ public class BookingController {
     private final BookingService bookingService;
     private final UserService userService;
     private final EmailService emailService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/{id}")
     ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id) {
@@ -67,6 +72,7 @@ public class BookingController {
     @PostMapping("/schedule")
     ResponseEntity<Void> scheduleBooking(@RequestBody @Valid ScheduleBookingRequest request){
         bookingService.scheduleBooking(request);
+
         return ResponseEntity.noContent().build();
     }
     @PostMapping("/cancel")
