@@ -73,11 +73,6 @@ public class BookingController {
     ResponseEntity<Void> scheduleBooking(@RequestBody @Valid ScheduleBookingRequest request){
         bookingService.scheduleBooking(request);
 
-        Booking book = bookingService.getBookingById(request.getBookingId()).get();
-        String msg = String.format("New booking with tutor %s was scheduled for %s",book.getTutor(),book.getDate());
-
-        messagingTemplate.convertAndSend("/topic/notification", msg);
-
         return ResponseEntity.noContent().build();
     }
     @PostMapping("/cancel")
@@ -100,7 +95,7 @@ public class BookingController {
                 .build();
         emailService.sendEmail(emailRequest);
         bookingService.cancelBooking(request);
-        
+
         return ResponseEntity.noContent().build();
     }
     @PostMapping("/accept")
