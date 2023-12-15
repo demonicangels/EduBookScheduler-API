@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailServiceImpl implements EmailService {
     private final JavaMailSender javaMailSender;
-    private String recipient = "nikolgeova@gmail.com";
+    private String recipient = "n.genova@student.fontys.nl";
+    //change according to your needs
     private String sender;
 
     @Autowired
@@ -26,7 +27,7 @@ public class EmailServiceImpl implements EmailService {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
             mailMessage.setTo(recipient);
             mailMessage.setFrom(sender);
-            mailMessage.setSubject("Booking confirmation");
+            mailMessage.setSubject(request.getSubject());
             mailMessage.setText(request.getMessage());
 
             javaMailSender.send(mailMessage);

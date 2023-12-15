@@ -15,8 +15,7 @@ public enum State {
             HashMap<State,List<Role>>hashMap=new HashMap<>();
 
             hashMap.put(Scheduled,List.of(Role.Tutor));
-            hashMap.put(Tutor_Reschedule_Requested,List.of(Role.Tutor));
-            hashMap.put(Student_Reschedule_Requested,List.of(Role.Student));
+            hashMap.put(Reschedule_Requested,List.of(Role.Tutor));
             hashMap.put(Cancelled,List.of(Role.Tutor,Role.Student));
 
             return hashMap;
@@ -27,8 +26,7 @@ public enum State {
         public HashMap<State, List<Role>> getNextModifiableState(){
             HashMap<State,List<Role>>hashMap=new HashMap<>();
 
-            hashMap.put(Tutor_Reschedule_Requested,List.of(Role.Tutor));
-            hashMap.put(Student_Reschedule_Requested,List.of(Role.Student));
+            hashMap.put(Reschedule_Requested,List.of(Role.Tutor, Role.Student));
             hashMap.put(Cancelled,List.of(Role.Tutor,Role.Student));
             hashMap.put(Finished,List.of(Role.Tutor));
 
@@ -41,14 +39,13 @@ public enum State {
         public HashMap<State, List<Role>> getNextModifiableState(){
             HashMap<State,List<Role>>hashMap=new HashMap<>();
 
-            hashMap.put(Tutor_Reschedule_Requested,List.of(Role.Tutor));
-            hashMap.put(Student_Reschedule_Requested,List.of(Role.Student));
+            hashMap.put(Reschedule_Requested,List.of(Role.Student));
 
             return hashMap;
         }
     },
     Finished(4),
-    Tutor_Reschedule_Requested(5){
+    Reschedule_Requested(5){
         @Override
         public HashMap<State, List<Role>> getNextModifiableState(){
             HashMap<State,List<Role>>hashMap=new HashMap<>();
@@ -59,18 +56,19 @@ public enum State {
             return hashMap;
         }
     },
-    Student_Reschedule_Requested(6){
+    Rescheduled(6),
+    Reschedule_Wait_Accept(7){
         @Override
         public HashMap<State, List<Role>> getNextModifiableState(){
             HashMap<State,List<Role>>hashMap=new HashMap<>();
 
             hashMap.put(Cancelled,List.of(Role.Tutor,Role.Student));
-            hashMap.put(Rescheduled,List.of(Role.Tutor));
+            hashMap.put(Scheduled,List.of(Role.Student));
 
             return hashMap;
         }
-    },
-    Rescheduled(7);
+    }
+    ;
 
     private final int stateId;
     public HashMap<State,List<Role>> getNextModifiableState(){

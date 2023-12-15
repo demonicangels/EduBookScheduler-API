@@ -3,20 +3,20 @@ package com.smartbyte.edubookschedulerbackend.controller;
 import com.smartbyte.edubookschedulerbackend.business.BookingService;
 import com.smartbyte.edubookschedulerbackend.business.EmailService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
-import com.smartbyte.edubookschedulerbackend.business.request.CreateBookingRequest;
-import com.smartbyte.edubookschedulerbackend.business.request.RescheduleBookingRequest;
-import com.smartbyte.edubookschedulerbackend.business.request.SendEmailRequest;
-import com.smartbyte.edubookschedulerbackend.business.request.UpdateBookingStateRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.*;
 import com.smartbyte.edubookschedulerbackend.business.response.*;
 import com.smartbyte.edubookschedulerbackend.domain.*;
+import com.smartbyte.edubookschedulerbackend.domain.BookingRequest;
 import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,8 +32,6 @@ public class BookingController {
     private final BookingService bookingService;
     private final UserService userService;
     private final EmailService emailService;
-    private final EntityConverter converter;
-    private final BookingRepository bookingRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -71,38 +69,8 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getUpcomingBookings(studentId));
     }
 
-    @PostMapping("/add")
-    ResponseEntity<CreateBookingResponse> createBooking(@RequestBody CreateBookingRequest request) {
-        Optional<User> optStudent = userService.getUser(request.getStudentId());
-        if (optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-        Optional<User> optTutor = userService.getTutorByName(request.getTutorName());
-        if (optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-
-        User student = optStudent.get();
-        User tutor = optTutor.get();
-
-        Booking newBooking = (Booking.builder()
-                .description(request.getDescription())
-                .tutor(tutor)
-                .student(student)
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .build());
-
-        Booking new2Booking = bookingService.createBooking2(newBooking, request.getDate());
-
-
-        CreateBookingResponse response = CreateBookingResponse.builder()
-                .booking(new2Booking)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @PutMapping("/schedule")
-    ResponseEntity<Void>scheduleBooking(@RequestBody UpdateBookingStateRequest request){
+    @PostMapping("/schedule")
+    ResponseEntity<Void> scheduleBooking(@RequestBody @Valid ScheduleBookingRequest request){
         bookingService.scheduleBooking(request);
 
         Booking book = bookingService.getBookingById(request.getBookingId()).get();
@@ -112,22 +80,36 @@ public class BookingController {
 
         return ResponseEntity.noContent().build();
     }
-    @PutMapping("/cancel")
-    ResponseEntity<Void>cancelBooking(@RequestBody UpdateBookingStateRequest request){
+    @PostMapping("/cancel")
+    ResponseEntity<Void> cancelBooking(@RequestBody UpdateBookingStateRequest request){
+        Booking booking = bookingService.getBookingById(request.getBookingId()).get();
+
+        Date date = booking.getDate();
+        LocalDateTime inputDateTime = LocalDateTime.parse(date.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("y-M-d");
+
+        String tutor = booking.getTutor().getName();
+        String about = booking.getDescription();
+
+
+        SendEmailRequest emailRequest = SendEmailRequest.builder()
+                .message("Booking with " + tutor +
+                        " on " + inputDateTime.format(outputFormatter) +
+                        ". Description of the booking: " + about + "has been canceled. The tutor isn't available at this time. Please reschedule.")
+                .subject("Booking Canceled")
+                .build();
+        emailService.sendEmail(emailRequest);
         bookingService.cancelBooking(request);
-
-        Booking book = bookingService.getBookingById(request.getBookingId()).get();
-        String msg = String.format("Your booking with tutor %s for %s was cancelled.",book.getTutor(),book.getDate().toString());
-
-        messagingTemplate.convertAndSend("/topic/notification", msg);
-
+        
         return ResponseEntity.noContent().build();
-    }@PutMapping("/accept")
-    ResponseEntity<Void>acceptBooking(@RequestBody UpdateBookingStateRequest request){
+    }
+    @PostMapping("/accept")
+    ResponseEntity<Void> acceptBooking(@RequestBody AcceptBookingRequest request){
 
         bookingService.acceptBooking(request);
 
-        Booking booking = converter.convertFromBookingEntity(bookingRepository.findById(request.getBookingId()).get());
+        Booking booking = bookingService.getBookingRequestById(request.getBookingRequestId())
+                .map(r -> r.getBookingToSchedule()).get();
 
         Date date = booking.getDate();
         LocalDateTime inputDateTime = LocalDateTime.parse(date.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
@@ -141,41 +123,40 @@ public class BookingController {
                 .message("Confirmation for booking with " + tutor +
                         " on " + inputDateTime.format(outputFormatter) +
                         ". Description of the booking: " + about)
+                .subject("Booking Confirmation")
                 .build();
 
         emailService.sendEmail(emailRequest);
 
         return ResponseEntity.noContent().build();
 
-    }@PutMapping("/finish")
+    }
+    @PostMapping("/finish")
     ResponseEntity<Void>finishBooking(@RequestBody UpdateBookingStateRequest request){
         bookingService.finishBooking(request);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("")
-    ResponseEntity<RescheduleBookingResponse> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
-        Optional<User> optStudent = userService.getUser(request.getStudentId());
-        if (optStudent.isEmpty() || optStudent.get().getRole() != Role.Student)
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
-        Optional<User> optTutor = userService.getUser(request.getTutorId());
-        if (optTutor.isEmpty() || optTutor.get().getRole() != Role.Tutor)
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
+    @PostMapping("/reschedule")
+    ResponseEntity<Void> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
+        bookingService.rescheduleBooking(request);
 
-        Optional<Booking> optNewBooking = bookingService.rescheduleBooking(Booking.builder()
-                .id(request.getId())
-                .date(request.getDate())
-                .description(request.getDescription())
-//                        .student((Student)optStudent.get())
-//                        .tutor((Tutor)optTutor.get())
-                .build());
-        if (optNewBooking.isEmpty())
-            return ResponseEntity.unprocessableEntity().build();
+        return ResponseEntity.noContent().build();
+    }
 
-        Booking newBooking = optNewBooking.get();
-        RescheduleBookingResponse response = RescheduleBookingResponse.builder()
-                .booking(newBooking)
-                .build();
-        return ResponseEntity.ok(response);
+    @GetMapping("/request/sentby/{id}")
+    ResponseEntity<List<BookingRequest>> getRequestsSentBy(@PathVariable("id") long userId){
+        User user = userService.getUser(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return ResponseEntity.ok(bookingService.getSentBookingRequests(user));
+    }
+
+    @GetMapping("/request/receivedby/{id}")
+    ResponseEntity<List<BookingRequest>> getRequestsReceivedBy(@PathVariable("id") long userId){
+        User user = userService.getUser(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return ResponseEntity.ok(bookingService.getReceivedBookingRequests(user));
     }
 }

@@ -33,9 +33,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> getUser(long id) {
-        return Optional.of(converter.convertFromUserEntity(userRepository.findById(id).get()));
+        return userRepository.findById(id)
+                .map(converter::convertFromUserEntity);
     }
-
     @Override
     public Optional<User> updateUser(User user) {
         if (userRepository.existsById(user.getId())) {
