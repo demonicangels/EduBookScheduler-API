@@ -95,11 +95,26 @@ public class BookingServiceImpl implements BookingService {
         return responses;
     }
 
+
+    /**
+     *
+     * @param id Booking's id
+     * @return Optional of booking
+     *
+     * @should return Optional of booking
+     */
     @Override
     public Optional<Booking> getBookingById(long id) {
         return Optional.of(converter.convertFromBookingEntity(bookingRepository.findById(id).get()));
     }
 
+    /**
+     *
+     * @param user User
+     * @return List of bookings
+     *
+     * @should return list of bookings
+     */
     @Override
     public List<Booking> getUsersBooking(User user) {
         List<Booking> bookings = new ArrayList<>();

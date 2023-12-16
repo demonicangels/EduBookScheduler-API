@@ -1,8 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
-import com.smartbyte.edubookschedulerbackend.domain.Booking;
-import com.smartbyte.edubookschedulerbackend.domain.Role;
-import com.smartbyte.edubookschedulerbackend.domain.Tutor;
+import com.smartbyte.edubookschedulerbackend.domain.*;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUpcomingBookingsResponse;
@@ -12,6 +10,8 @@ import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntit
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -166,4 +167,136 @@ import static org.mockito.Mockito.when;
     }
 
 
+    /**
+     * @verifies return list of bookings
+     * @see BookingServiceImpl#getUsersBooking(com.smartbyte.edubookschedulerbackend.domain.User)
+     */
+    @ParameterizedTest
+    @EnumSource(value = Role.class,names = {"Tutor","Student"})
+    void getUsersBooking_shouldReturnListOfBookings(Role role) {
+        //Arrange
+        User user=Admin.builder().build();
+
+        UserEntity userEntity=UserEntity.builder()
+                .id(1L)
+                .role(role.getRoleId())
+                .build();
+
+        List<Booking>expectedBookings=new ArrayList<>();
+
+
+        switch (role) {
+            case Tutor -> {
+                user = Tutor.builder()
+                        .id(userEntity.getId())
+                        .role(role)
+                        .build();
+                when(converter.convertFromUser(user)).thenReturn(userEntity);
+
+                List<BookingEntity>bookingEntities=List.of(
+                        BookingEntity.builder()
+                                .id(1L)
+                                .tutor(userEntity)
+                                .build(),
+                        BookingEntity.builder()
+                                .id(2L)
+                                .tutor(userEntity)
+                                .build()
+                );
+
+                when(bookingRepository.findByTutor(userEntity)).thenReturn(bookingEntities);
+                for (BookingEntity bookingEntity:bookingEntities){
+                    Tutor tutor=Tutor.builder()
+                            .id(bookingEntity.getTutor().getId())
+                            .role(Role.fromRoleId(bookingEntity.getTutor().getRole()))
+                            .build();
+
+                    Booking booking=Booking.builder()
+                            .id(bookingEntity.getId())
+                            .tutor(tutor)
+                            .build();
+
+                    when(converter.convertFromBookingEntity(bookingEntity)).thenReturn(booking);
+
+                    expectedBookings.add(booking);
+
+                }
+            }
+            case Student -> {
+                user=Student.builder()
+                        .id(userEntity.getId())
+                        .role(role)
+                        .build();
+                when(converter.convertFromUser(user)).thenReturn(userEntity);
+                List<BookingEntity>bookingEntities=List.of(
+                        BookingEntity.builder()
+                                .id(1L)
+                                .student(userEntity)
+                                .build(),
+                        BookingEntity.builder()
+                                .id(2L)
+                                .student(userEntity)
+                                .build()
+                );
+
+                when(bookingRepository.findByStudent(userEntity)).thenReturn(bookingEntities);
+                for (BookingEntity bookingEntity:bookingEntities){
+                    Student student=Student.builder()
+                            .id(bookingEntity.getStudent().getId())
+                            .role(Role.fromRoleId(bookingEntity.getStudent().getRole()))
+                            .build();
+
+                    Booking booking=Booking.builder()
+                            .id(bookingEntity.getId())
+                            .student(student)
+                            .build();
+
+                    when(converter.convertFromBookingEntity(bookingEntity)).thenReturn(booking);
+
+                    expectedBookings.add(booking);
+
+                }
+
+                when(bookingRepository.findByStudent(userEntity)).thenReturn(bookingEntities);
+            }
+        }
+
+        //Act
+        List<Booking>actualBookings=bookingService.getUsersBooking(user);
+
+        //Assert
+        assertEquals(expectedBookings,actualBookings);
+
+    }
+
+    /**
+     * @verifies return Optional of booking
+     * @see BookingServiceImpl#getBookingById(long)
+     */
+    @Test
+    void getBookingById_shouldReturnOptionalOfBooking() {
+        //Arrange
+
+        BookingEntity bookingEntity=BookingEntity.builder()
+                .id(1L)
+                .build();
+
+        Booking booking=Booking.builder()
+                .id(bookingEntity.getId())
+                .build();
+
+        when(bookingRepository.findById(bookingEntity.getId())).thenReturn(Optional.of(bookingEntity));
+
+        when(converter.convertFromBookingEntity(bookingEntity)).thenReturn(booking);
+
+        Optional<Booking>expectedBooking=Optional.of(booking);
+
+        //Act
+
+        Optional<Booking>actualBooking=bookingService.getBookingById(booking.getId());
+
+        //Assert
+        assertEquals(expectedBooking,actualBooking);
+
+    }
 }

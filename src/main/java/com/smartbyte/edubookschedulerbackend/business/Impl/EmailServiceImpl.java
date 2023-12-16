@@ -21,6 +21,14 @@ public class EmailServiceImpl implements EmailService {
         this.javaMailSender = javaMailSender;
         this.sender = sender;
     }
+
+    /**
+     *
+     * @param request SendEmailRequest
+     * @return email is sent notification
+     *
+     * @should send email
+     */
     @Override
     public String sendEmail(SendEmailRequest request) {
         try{
