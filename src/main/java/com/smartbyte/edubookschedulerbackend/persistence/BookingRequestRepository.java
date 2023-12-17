@@ -20,5 +20,8 @@ public interface BookingRequestRepository extends JpaRepository<BookingRequestEn
 
     List<BookingRequestEntity> findBookingRequestsEntitiesByReceiver(UserEntity receiver);
     List<BookingRequestEntity> findBookingRequestsEntitiesByRequester(UserEntity requester);
-    Optional<BookingRequestEntity> findBookingRequestEntityByReceiverAndRequesterAndBookingToSchedule(UserEntity receiver, UserEntity requester, BookingEntity bookingToSchedule);
+    @Query("SELECT bre FROM BookingRequestEntity bre WHERE (bre.bookingToSchedule = :bookingToSchedule) AND " +
+            "((bre.requester = :user1 AND bre.receiver = :user2) OR (bre.requester = :user2 AND bre.receiver = :user1))")
+    Optional<BookingRequestEntity> findPreviousRequest(@Param("user1") UserEntity user1, @Param("user2") UserEntity user2,
+                                                       @Param("bookingToSchedule") BookingEntity bookingToSchedule);
 }
