@@ -20,6 +20,7 @@ import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntit
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class AvailabilityServiceImpl implements AvailabilityService {
 
     private final BookingRepository bookingRepository;
@@ -74,6 +76,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 .build()).toList();
     }
 
+    /**
+     *
+     * @return GetUsersResponse
+     *
+     * @should return empty list if tutor is not found
+     * @should return list of tutors if tutors are found
+     */
     @Override
     public GetUsersResponse GetTutors() {
         List<UserEntity> tutorEntity = userRepository.findByRole(1);
@@ -86,6 +95,14 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         return response;
     }
 
+    /**
+     *
+     * @param id tutor's id
+     * @return GetTutorsNameResponse or null
+     *
+     * @should return null if user is not found
+     * @should return tutor's name if user is found
+     */
     @Override
     public GetTutorsNameResponse GetTutorsName(long id) {
         Optional<UserEntity> user = userRepository.getUserById(id);
@@ -98,6 +115,15 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         return null;
     }
 
+
+    /**
+     *
+     * @param id User's id
+     * @return GetAvailabilityTutorResponse
+     *
+     * @should throw UserNotFoundException when user is not found
+     * @should return GetAvailabilityTutorResponse
+     */
     @Override
     public GetAvailabilityTutorResponse getTutorsBooking(long id) {
         Optional<UserEntity> user = userRepository.findById(id);
@@ -112,6 +138,16 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             throw new UserNotFoundException();
         }
     }
+
+    /**
+     *
+     * @param requests List of CreateSetAvailabilityRequest
+     * @return List of CreateSetAvailabilityResponse
+     *
+     * @should throw RunTimeException if tutor is not found
+     * @should throw RunTimeException if time overlaps
+     * @should add new availabilities
+     */
     @Transactional
     @Override
     public List<CreateSetAvailabilityResponse> createAvailability(List<CreateSetAvailabilityRequest> requests) {
@@ -137,7 +173,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         List<AvailabilityEntity> savedAvailabilityEntities = new ArrayList<>();
 
         for (AvailabilityEntity newAvailability : newAvailabilityEntities) {
-            try {
+//            try {
                 List<AvailabilityEntity> existingAvailability = availabilityRepository
                         .findAllByTutorAndDate(newAvailability.getTutor(), newAvailability.getDate());
 
@@ -150,9 +186,9 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
                 AvailabilityEntity savedAvailabilityEntity = availabilityRepository.save(entityManager.merge(newAvailability));
                 savedAvailabilityEntities.add(savedAvailabilityEntity);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
         }
 
         List<AvailabilityDomain> availabilityDomains = savedAvailabilityEntities.stream()
@@ -167,7 +203,14 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     }
 
 
-
+    /**
+     *
+     * @param id User id
+     * @return List of user's availabilities
+     *
+     * @should throw RunTimeException if user is not found
+     * @should return List of availabilities
+     */
     @Override
     public List<GetSetAvailabilityResponse> getAvailabilityOfTutorWeekly(long id) {
         Optional<UserEntity> tutorOptional = userRepository.getUserById(id);

@@ -22,6 +22,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EntityConverter converter;
 
+    /**
+     *
+     * @param request CreateUserRequest
+     * @return User
+     *
+     * @should save user
+     */
     @Override
     public User createUser(CreateUserRequest request) {
 
@@ -31,6 +38,13 @@ public class UserServiceImpl implements UserService {
         return converter.convertFromUserEntity(user);
     }
 
+    /**
+     *
+     * @param id user id
+     * @return Optional of User
+     *
+     * @should return user
+     */
     @Override
     public Optional<User> getUser(long id) {
         return userRepository.findById(id)
@@ -44,6 +58,13 @@ public class UserServiceImpl implements UserService {
             return Optional.empty();
         }
     }
+
+    /**
+     *
+     * @param user User
+     *
+     * @should delete User
+     */
 
     @Override
     public void deleteUser(User user) {

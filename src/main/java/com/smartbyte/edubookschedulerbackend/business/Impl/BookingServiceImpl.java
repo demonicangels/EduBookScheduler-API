@@ -95,11 +95,26 @@ public class BookingServiceImpl implements BookingService {
         return responses;
     }
 
+
+    /**
+     *
+     * @param id Booking's id
+     * @return Optional of booking
+     *
+     * @should return Optional of booking
+     */
     @Override
     public Optional<Booking> getBookingById(long id) {
-        return Optional.of(converter.convertFromBookingEntity(bookingRepository.findById(id).get()));
+        return bookingRepository.findById(id).map(converter::convertFromBookingEntity);
     }
 
+    /**
+     *
+     * @param user User
+     * @return List of bookings
+     *
+     * @should return list of bookings
+     */
     @Override
     public List<Booking> getUsersBooking(User user) {
         List<Booking> bookings = new ArrayList<>();
@@ -121,6 +136,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
+    /**
+     *
+     * @param request ScheduleBookingRequest
+     *
+     * @should throw ResponseStatusException when requester is not found
+     * @should throw ResponseStatusException when receiver is not found
+     * @should throw ResponseStatusException when requester is not a student or receiver is not tutor
+     * @should save the new booking request
+     *
+     */
     @Override
     @Transactional
     public void scheduleBooking(ScheduleBookingRequest request) {
@@ -163,6 +188,17 @@ public class BookingServiceImpl implements BookingService {
         bookingRequestRepo.save(converter.convertFromBookingRequest(bookingRequest));
     }
 
+    /**
+     *
+     * @param request RescheduleBookingRequest
+     *
+     * @should throw ResponseStatusException when requester is not found
+     * @should throw ResponseStatusException when receiver is not found
+     * @should throw ResponseStatusException when booking is not found
+     * @should throw ResponseStatusException when booking request is not found
+     * @should reschedule booking when requester is a tutor
+     * @should reschedule booking when requester is a student
+     */
     @Override
     @Transactional
     public void rescheduleBooking(RescheduleBookingRequest request) {
@@ -184,6 +220,22 @@ public class BookingServiceImpl implements BookingService {
                                 "Booking doesn't exist"
                         )
                 );
+
+        State bookingState = rescheduledBooking.getState();
+        if(bookingState == State.Requested || bookingState == State.Reschedule_Requested){
+            BookingRequest prevSchedRequest = bookingRequestRepo.findBookingRequestEntityByReceiverAndRequesterAndBookingToSchedule(
+                    converter.convertFromUser(receiver),
+                    converter.convertFromUser(requester),
+                    converter.convertFromBooking(rescheduledBooking)
+            )
+                    .map(converter::convertFromBookingRequestEntity)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Invalid state: booking without request"
+                    ));
+
+            bookingRequestRepo.updateAnswer(prevSchedRequest.getId(), BookingRequestAnswer.Rejected);
+        }
 
         updateBookingState(rescheduledBooking.getId(), State.Reschedule_Requested);
 
@@ -216,6 +268,22 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
+    /**
+     *
+     * @param request AcceptBookingRequest
+     *
+     * @should throw BookingRequestNotFoundException when booking request is not found
+     * @should throw ResponseStatusException when new answer is invalid
+     * @should throw ResponseStatusException when booking request answer is not no answer
+     * @should throw ResponseStatusException when new answer is no answer
+     * @should throw ResponseStatusException when new answer is accepted, booking request's type is schedule, and booking state is not requested
+     * @should throw ResponseStatusException when new answer is accepted, booking request's type is reschedule, and booking state is not reschedule requested
+     * @should throw ResponseStatusException when new answer is accepted, booking request's type is reschedule, and rescheduled booking state is not reshedule wait accept
+     * @should accept booking when new answer is accepted and booking request's type is schedule
+     * @should accept booking when new answer is accepted and booking request's type is reschedule
+     * @should cancel booking when new answer is rejected
+     * @should cancel rescheduled booking when new answer is rejected and booking request has rescheduled a booking
+     */
     @Override
     @Transactional
     public void acceptBooking(AcceptBookingRequest request) {
@@ -259,22 +327,34 @@ public class BookingServiceImpl implements BookingService {
                     break;
             }
         } else if (answer == BookingRequestAnswer.Rejected) {
-            updateBookingState(schedBookingRequest.getBookingToReschedule().getId(), State.Cancelled);
-            Booking schedBooking = schedBookingRequest.getBookingToSchedule();
-            if(schedBooking != null){
-                updateBookingState(schedBooking.getId(), State.Cancelled);
+            updateBookingState(schedBookingRequest.getBookingToSchedule().getId(), State.Cancelled);
+            Booking reschedBooking = schedBookingRequest.getBookingToReschedule();
+            if(reschedBooking != null){
+                updateBookingState(reschedBooking.getId(), State.Cancelled);
             }
         }
 
 
     }
 
+    /**
+     *
+     * @param request UpdateBookingStateRequest
+     *
+     * @should update the booking state to cancelled
+     */
     @Override
     @Transactional
     public void cancelBooking(UpdateBookingStateRequest request) {
         updateBookingState(request.getBookingId(),State.Cancelled);
     }
 
+    /**
+     *
+     * @param request UpdateBookingStateRequest
+     *
+     * @should update the booking state to finished
+     */
     @Override
     @Transactional
     public void finishBooking(UpdateBookingStateRequest request) {
@@ -287,18 +367,40 @@ public class BookingServiceImpl implements BookingService {
                  .map(converter::convertFromBookingRequestEntity);
     }
 
+    /**
+     *
+     * @param user User
+     * @return List of booking requests
+     *
+     * @should return list of booking requests
+     */
     @Override
     public List<BookingRequest> getSentBookingRequests(User user) {
         return bookingRequestRepo.findBookingRequestsEntitiesByRequester(converter.convertFromUser(user))
                 .stream().map(converter::convertFromBookingRequestEntity).toList();
     }
 
+    /**
+     *
+     * @param user User
+     * @return List of booking requests
+     *
+     * @should return list of booking requests
+     */
     @Override
     public List<BookingRequest> getReceivedBookingRequests(User user) {
         return bookingRequestRepo.findBookingRequestsEntitiesByReceiver(converter.convertFromUser(user))
                 .stream().map(converter::convertFromBookingRequestEntity).toList();
     }
 
+    /**
+     *
+     * @param bookingId booking id
+     * @param newState new booking state
+     *
+     * @should throw BookingNotFoundException when booking is not found
+     * @should throw InvalidNewBookingStateException when booking cannot be changed to the new state
+     */
     @Transactional
     public void updateBookingState(long bookingId,State newState) {
         //Check if the booking exists
