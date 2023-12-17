@@ -200,6 +200,22 @@ public class BookingServiceImpl implements BookingService {
                         )
                 );
 
+        State bookingState = rescheduledBooking.getState();
+        if(bookingState == State.Requested || bookingState == State.Reschedule_Requested){
+            BookingRequest prevSchedRequest = bookingRequestRepo.findBookingRequestEntityByReceiverAndRequesterAndBookingToSchedule(
+                    converter.convertFromUser(receiver),
+                    converter.convertFromUser(requester),
+                    converter.convertFromBooking(rescheduledBooking)
+            )
+                    .map(converter::convertFromBookingRequestEntity)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Invalid state: booking without request"
+                    ));
+
+            bookingRequestRepo.updateAnswer(prevSchedRequest.getId(), BookingRequestAnswer.Rejected);
+        }
+
         updateBookingState(rescheduledBooking.getId(), State.Reschedule_Requested);
 
         Booking.BookingBuilder bookingBuilder = Booking.builder()
@@ -274,10 +290,10 @@ public class BookingServiceImpl implements BookingService {
                     break;
             }
         } else if (answer == BookingRequestAnswer.Rejected) {
-            updateBookingState(schedBookingRequest.getBookingToReschedule().getId(), State.Cancelled);
-            Booking schedBooking = schedBookingRequest.getBookingToSchedule();
-            if(schedBooking != null){
-                updateBookingState(schedBooking.getId(), State.Cancelled);
+            updateBookingState(schedBookingRequest.getBookingToSchedule().getId(), State.Cancelled);
+            Booking reschedBooking = schedBookingRequest.getBookingToReschedule();
+            if(reschedBooking != null){
+                updateBookingState(reschedBooking.getId(), State.Cancelled);
             }
         }
 
