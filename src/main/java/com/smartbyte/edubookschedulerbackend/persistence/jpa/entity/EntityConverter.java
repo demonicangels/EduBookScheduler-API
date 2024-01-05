@@ -1,10 +1,13 @@
 package com.smartbyte.edubookschedulerbackend.persistence.jpa.entity;
 
 import com.smartbyte.edubookschedulerbackend.domain.*;
+import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EntityConverter {
+
+    private UserRepository userRepo;
 
     public BookingEntity convertFromBooking(Booking booking){
          if(booking == null) return null;
@@ -87,6 +90,7 @@ public class EntityConverter {
                 .password(studentInfoEntity.getPassword())
                 .profilePicURL(studentInfoEntity.getProfilePicURL())
                 .PCN(studentInfoEntity.getPcn())
+                .assignedTutorIds(studentInfoEntity.getTutors().stream().map(UserEntity::getId).toList())
                 .build();
     }
     public Tutor convertFromTutorEntity(TutorInfoEntity tutorInfoEntity){
@@ -97,6 +101,7 @@ public class EntityConverter {
                 .email(tutorInfoEntity.getEmail())
                 .password(tutorInfoEntity.getPassword())
                 .profilePicURL(tutorInfoEntity.getProfilePicURL())
+                .assignedStudentId(tutorInfoEntity.getStudents().stream().map(UserEntity::getId).toList())
                 .build();
     }
 

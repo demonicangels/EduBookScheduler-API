@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
@@ -13,4 +15,7 @@ public class Tutor extends User {
     public Role getRole() {
         return Role.Tutor;
     }
+
+    private List<Long> assignedStudentId;
+
 }
