@@ -223,9 +223,9 @@ public class BookingServiceImpl implements BookingService {
 
         State bookingState = rescheduledBooking.getState();
         if(bookingState == State.Requested || bookingState == State.Reschedule_Requested){
-            BookingRequest prevSchedRequest = bookingRequestRepo.findBookingRequestEntityByReceiverAndRequesterAndBookingToSchedule(
-                    converter.convertFromUser(receiver),
+            BookingRequest prevSchedRequest = bookingRequestRepo.findPreviousRequest(
                     converter.convertFromUser(requester),
+                    converter.convertFromUser(receiver),
                     converter.convertFromBooking(rescheduledBooking)
             )
                     .map(converter::convertFromBookingRequestEntity)
