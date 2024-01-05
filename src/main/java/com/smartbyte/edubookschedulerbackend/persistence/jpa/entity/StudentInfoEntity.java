@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @Entity
 @DiscriminatorValue("0")
 @Getter
@@ -14,4 +16,7 @@ import lombok.experimental.SuperBuilder;
 public class StudentInfoEntity extends UserEntity{
     @Column(name = "pcn")
     private Long pcn;
+
+    @ManyToMany(mappedBy = "students")
+    private List<TutorInfoEntity> tutors;
 }
