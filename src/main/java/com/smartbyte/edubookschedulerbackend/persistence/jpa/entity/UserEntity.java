@@ -43,7 +43,6 @@ public class UserEntity {
     @Column(name = "profile_picurl")
     private String profilePicURL;
 
-    @NotNull
     @Column(name = "role", insertable = false, updatable = false)
     private Integer role;
 

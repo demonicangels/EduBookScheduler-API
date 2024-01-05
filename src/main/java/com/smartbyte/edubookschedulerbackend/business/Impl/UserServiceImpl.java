@@ -8,6 +8,8 @@ import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileRes
 import com.smartbyte.edubookschedulerbackend.domain.Student;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.StudentInfoEntity;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.TutorInfoEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EntityConverter converter;
 
+    /**
+     *
+     * @param request CreateUserRequest
+     * @return User
+     *
+     * @should save user
+     */
     @Override
     public User createUser(CreateUserRequest request) {
 
@@ -31,6 +40,13 @@ public class UserServiceImpl implements UserService {
         return converter.convertFromUserEntity(user);
     }
 
+    /**
+     *
+     * @param id user id
+     * @return Optional of User
+     *
+     * @should return user
+     */
     @Override
     public Optional<User> getUser(long id) {
         return userRepository.findById(id)
@@ -44,6 +60,13 @@ public class UserServiceImpl implements UserService {
             return Optional.empty();
         }
     }
+
+    /**
+     *
+     * @param user User
+     *
+     * @should delete User
+     */
 
     @Override
     public void deleteUser(User user) {
@@ -98,23 +121,21 @@ public class UserServiceImpl implements UserService {
 
     private UserEntity saveUser(CreateUserRequest request) {
 
-        Integer roleInt = 0;
-
-        if (request.getRole().equals("Tutor"))
-        {
-            roleInt = 1;
-        }
-        else if (request.getRole().equals("Student"))
-    {
-            roleInt= 0;
-        }
-
-        return UserEntity.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .password(request.getPassword())
-                .profilePicURL(request.getProfilePicURL())
-                .role(roleInt)
-                .build();
+        return switch (request.getRole()){
+            case Student -> StudentInfoEntity.builder()
+                    .name(request.getName())
+                    .email(request.getEmail())
+                    .password(request.getPassword())
+                    .profilePicURL(request.getProfilePicURL())
+                    .pcn(123L)
+                    .build();
+            case Tutor -> TutorInfoEntity.builder()
+                    .name(request.getName())
+                    .email(request.getEmail())
+                    .password(request.getPassword())
+                    .profilePicURL(request.getProfilePicURL())
+                    .build();
+            default -> null;
+        };
   }
 }
