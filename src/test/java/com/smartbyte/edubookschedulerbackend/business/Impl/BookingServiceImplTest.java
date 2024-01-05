@@ -793,7 +793,7 @@ import static org.mockito.Mockito.*;
 
         when(converter.convertFromBookingEntity(bookingEntity)).thenReturn(booking);
 
-        when(bookingRequestRepository.findBookingRequestEntityByReceiverAndRequesterAndBookingToSchedule(
+        when(bookingRequestRepository.findPreviousRequest(
                 converter.convertFromUser(receiver),
                 converter.convertFromUser(requester),
                 converter.convertFromBooking(booking)
@@ -866,7 +866,7 @@ import static org.mockito.Mockito.*;
                 .receiver(receiverEntity)
                 .build();
 
-        when(bookingRequestRepository.findBookingRequestEntityByReceiverAndRequesterAndBookingToSchedule(
+        when(bookingRequestRepository.findPreviousRequest(
                 converter.convertFromUser(receiver),
                 converter.convertFromUser(requester),
                 converter.convertFromBooking(booking)
@@ -972,7 +972,7 @@ import static org.mockito.Mockito.*;
                 .receiver(receiverEntity)
                 .build();
 
-        when(bookingRequestRepository.findBookingRequestEntityByReceiverAndRequesterAndBookingToSchedule(
+        when(bookingRequestRepository.findPreviousRequest(
                 converter.convertFromUser(receiver),
                 converter.convertFromUser(requester),
                 converter.convertFromBooking(booking)
