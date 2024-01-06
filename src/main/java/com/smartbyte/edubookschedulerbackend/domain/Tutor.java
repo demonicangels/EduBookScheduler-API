@@ -1,6 +1,5 @@
 package com.smartbyte.edubookschedulerbackend.domain;
 
-import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -16,6 +15,7 @@ public class Tutor extends User {
         return Role.Tutor;
     }
 
-    private List<Long> assignedStudentId;
+    @EqualsAndHashCode.Exclude
+    private List<Student> assignedStudents;
 
 }

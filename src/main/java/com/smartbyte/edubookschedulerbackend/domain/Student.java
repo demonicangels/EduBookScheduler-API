@@ -16,5 +16,6 @@ public class Student extends User {
         return Role.Student;
     }
 
-    private List<Long> assignedTutorIds;
+    @EqualsAndHashCode.Exclude
+    private List<Tutor> assignedTutors;
 }
