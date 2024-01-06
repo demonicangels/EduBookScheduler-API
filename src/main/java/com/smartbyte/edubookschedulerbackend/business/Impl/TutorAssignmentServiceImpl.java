@@ -23,26 +23,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TutorAssignmentServiceImpl implements TutorAssignmentService {
 
-    final UserRepository userRepo;
-    final EntityConverter converter;
+    private final UserRepository userRepo;
+    private final EntityConverter converter;
 
+    /**
+     *
+      * @param request Assign student to tutor request
+     *
+     * @should modify the tutor assignments
+     */
     @Override
     @Transactional
     public void AssignStudentToTutor(AssignStudentToTutorRequest request) {
-//        TutorInfoEntity tutorInfo = (TutorInfoEntity) userRepo.getUserById(request.getTutorId()).get();
-//        StudentInfoEntity studentInfo = (StudentInfoEntity) userRepo.getUserById(request.getStudentId()).get();
-//
-//        tutorInfo.getStudents().add(studentInfo);
-//        userRepo.save(tutorInfo);
-
         Optional<UserEntity> optionalTutor=userRepo.getUserById(request.getTutorId());
 
         Tutor tutor=convertToTutor(optionalTutor);
 
-        tutor.setAssignedStudents(request.getStudentIds().stream().map(studentId->
-                convertToStudent(userRepo.getUserById(studentId))).toList());
+        tutor.setAssignedStudents(request.getStudentIds()
+                .stream().map(studentId->
+                        convertToStudent(userRepo.getUserById(studentId)))
+                .toList());
 
         TutorInfoEntity tutorInfo=converter.convertFromTutor(tutor);
+
         userRepo.save(tutorInfo);
     }
 
@@ -71,6 +74,15 @@ public class TutorAssignmentServiceImpl implements TutorAssignmentService {
 
     }
 
+    /**
+     *
+     * @param tutorId tutor id
+     * @return List of assigned students
+     *
+     * @should throw UserNotFoundException if tutor is not found
+     * @should throw IllegalArgumentException if role is not a tutor
+     * @should return list of assigned students
+     */
     @Override
     public List<GetAssignedUserResponse> GetTutorAssignedStudents(long tutorId) {
         Tutor tutor=convertToTutor(userRepo.getUserById(tutorId));
@@ -85,6 +97,14 @@ public class TutorAssignmentServiceImpl implements TutorAssignmentService {
         return responses;
     }
 
+    /**
+     *
+     * @param studentId student id
+     * @return List of assigned tutors
+     *
+     * @should throw IllegalArgumentException if role is not a student
+     * @should return list of assigned tutors
+     */
     @Override
     public List<GetAssignedUserResponse> GetStudentAssignedTutor(long studentId) {
         Student student=convertToStudent(userRepo.getUserById(studentId));
@@ -96,5 +116,6 @@ public class TutorAssignmentServiceImpl implements TutorAssignmentService {
                     .profilePicUrl(tutor.getProfilePicURL())
                     .build());
         }
-        return responses;    }
+        return responses;
+    }
 }
