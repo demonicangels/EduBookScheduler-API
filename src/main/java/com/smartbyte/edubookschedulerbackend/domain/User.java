@@ -15,4 +15,6 @@ public abstract class User {
     String password;
     String profilePicURL;
     Role role;
+
+
 }

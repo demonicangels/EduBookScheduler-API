@@ -3,6 +3,8 @@ package com.smartbyte.edubookschedulerbackend.domain;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
@@ -13,4 +15,7 @@ public class Student extends User {
     public Role getRole() {
         return Role.Student;
     }
+
+    @EqualsAndHashCode.Exclude
+    private List<Tutor> assignedTutors;
 }

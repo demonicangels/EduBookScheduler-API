@@ -1,10 +1,13 @@
 package com.smartbyte.edubookschedulerbackend.persistence.jpa.entity;
 
 import com.smartbyte.edubookschedulerbackend.domain.*;
+import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EntityConverter {
+
+    private UserRepository userRepo;
 
     public BookingEntity convertFromBooking(Booking booking){
          if(booking == null) return null;
@@ -68,6 +71,51 @@ public class EntityConverter {
                 .build();
     }
 
+    public TutorInfoEntity convertFromTutor(Tutor tutor){
+        if (tutor==null)return null;
+        return TutorInfoEntity.builder()
+                .id(tutor.getId())
+                .name(tutor.getName())
+                .email(tutor.getEmail())
+                .password(tutor.getPassword())
+                .profilePicURL(tutor.getProfilePicURL())
+                .students(tutor.getAssignedStudents().stream().map(this::convertFromStudentSimplified).toList())
+                .build();
+    }
+    public TutorInfoEntity convertFromTutorSimplified(Tutor tutor){
+        if (tutor==null)return null;
+        return TutorInfoEntity.builder()
+                .id(tutor.getId())
+                .name(tutor.getName())
+                .email(tutor.getEmail())
+                .password(tutor.getPassword())
+                .profilePicURL(tutor.getProfilePicURL())
+                .build();
+    }
+    public StudentInfoEntity convertFromStudent(Student student){
+        if (student==null)return null;
+        return StudentInfoEntity.builder()
+                .id(student.getId())
+                .name(student.getName())
+                .email(student.getEmail())
+                .password(student.getPassword())
+                .profilePicURL(student.getProfilePicURL())
+                .pcn(student.getPCN())
+                .tutors(student.getAssignedTutors().stream().map(this::convertFromTutor).toList())
+                .build();
+    }
+    public StudentInfoEntity convertFromStudentSimplified(Student student){
+        if (student==null)return null;
+        return StudentInfoEntity.builder()
+                .id(student.getId())
+                .name(student.getName())
+                .email(student.getEmail())
+                .password(student.getPassword())
+                .profilePicURL(student.getProfilePicURL())
+                .pcn(student.getPCN())
+                .build();
+    }
+
     public User convertFromUserEntity(UserEntity userEntity){
         if(userEntity == null) return null;
         return switch(userEntity.getRole()){
@@ -87,9 +135,33 @@ public class EntityConverter {
                 .password(studentInfoEntity.getPassword())
                 .profilePicURL(studentInfoEntity.getProfilePicURL())
                 .PCN(studentInfoEntity.getPcn())
+                .assignedTutors(studentInfoEntity.getTutors().stream().map(this::convertFromTutorEntitySimplified).toList())
+                .build();
+    }
+
+    public Student convertFromStudentEntitySimplified(StudentInfoEntity studentInfoEntity){
+        if(studentInfoEntity == null) return null;
+        return Student.builder()
+                .id(studentInfoEntity.getId())
+                .name(studentInfoEntity.getName())
+                .email(studentInfoEntity.getEmail())
+                .password(studentInfoEntity.getPassword())
+                .profilePicURL(studentInfoEntity.getProfilePicURL())
+                .PCN(studentInfoEntity.getPcn())
                 .build();
     }
     public Tutor convertFromTutorEntity(TutorInfoEntity tutorInfoEntity){
+        if(tutorInfoEntity == null) return null;
+        return Tutor.builder()
+                .id(tutorInfoEntity.getId())
+                .name(tutorInfoEntity.getName())
+                .email(tutorInfoEntity.getEmail())
+                .password(tutorInfoEntity.getPassword())
+                .profilePicURL(tutorInfoEntity.getProfilePicURL())
+                .assignedStudents(tutorInfoEntity.getStudents().stream().map(this::convertFromStudentEntitySimplified).toList())
+                .build();
+    }
+    public Tutor convertFromTutorEntitySimplified(TutorInfoEntity tutorInfoEntity){
         if(tutorInfoEntity == null) return null;
         return Tutor.builder()
                 .id(tutorInfoEntity.getId())
