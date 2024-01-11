@@ -2,6 +2,7 @@ package com.smartbyte.edubookschedulerbackend.controller;
 
 import com.smartbyte.edubookschedulerbackend.business.TutorAssignmentService;
 import com.smartbyte.edubookschedulerbackend.business.request.AssignStudentToTutorRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.SearchAssignedUserByNameRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetAssignedUserResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,11 @@ public class TutorAssignmentController {
     @GetMapping("/{id}")
     ResponseEntity<List<GetAssignedUserResponse>>getAssignedTutors(@PathVariable(value = "id")long id){
         return ResponseEntity.ok(tutorAssignmentService.GetStudentAssignedTutor(id));
+    }
+
+    @GetMapping("/search")
+    ResponseEntity<List<GetAssignedUserResponse>>searchAssignedTutorsByName(@RequestBody SearchAssignedUserByNameRequest request){
+        return ResponseEntity.ok(tutorAssignmentService.searchAssignedTutorByName(request));
     }
 
 }
