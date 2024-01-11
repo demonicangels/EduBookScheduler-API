@@ -1,12 +1,8 @@
 package com.smartbyte.edubookschedulerbackend.persistence;
 
-import com.smartbyte.edubookschedulerbackend.domain.Role;
-import com.smartbyte.edubookschedulerbackend.domain.User;
-import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.StudentInfoEntity;
-import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.TutorInfoEntity;
+
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -33,5 +29,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Query("SELECT sie.tutors FROM StudentInfoEntity sie WHERE sie.id=:id")
     Set<UserEntity> getStudentAssignedTutors(@Param("id") long studentId);
+
+    List<UserEntity>findByRoleAndNameContainingIgnoreCase(int role,String name);
 
 }

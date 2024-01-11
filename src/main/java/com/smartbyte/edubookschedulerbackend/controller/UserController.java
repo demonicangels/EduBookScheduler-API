@@ -4,12 +4,15 @@ import com.smartbyte.edubookschedulerbackend.business.LoginService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest;
 import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
+import com.smartbyte.edubookschedulerbackend.business.response.GetAssignedUserResponse;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
 import com.smartbyte.edubookschedulerbackend.business.response.LoginResponse;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -31,5 +34,11 @@ public class UserController {
     @GetMapping("{id}")
     ResponseEntity<GetUserProfileResponse>getUserProfile(@PathVariable(value = "id") long id){
         return ResponseEntity.ok(userService.getUserProfile(id));
+    }
+
+    @GetMapping("/tutor/{name}")
+    ResponseEntity<List<GetAssignedUserResponse>>searchTutorByName(@PathVariable String name){
+        List<GetAssignedUserResponse>responses=userService.searchTutorsByName(name);
+        return ResponseEntity.ok(responses);
     }
 }

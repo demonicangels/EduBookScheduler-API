@@ -2,6 +2,7 @@ package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.AssignStudentToTutorRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.SearchAssignedUserByNameRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetAssignedUserResponse;
 import com.smartbyte.edubookschedulerbackend.domain.Role;
 import com.smartbyte.edubookschedulerbackend.domain.Student;
@@ -284,6 +285,82 @@ class TutorAssignmentServiceImplTest {
 
         //Act
         List<GetAssignedUserResponse>actualResponses=tutorAssignmentService.GetStudentAssignedTutor(student.getId());
+
+        //Assert
+        assertEquals(expectedResponses,actualResponses);
+    }
+
+    /**
+     * @verifies return filtered tutor
+     * @see TutorAssignmentServiceImpl#searchAssignedTutorByName(com.smartbyte.edubookschedulerbackend.business.request.SearchAssignedUserByNameRequest)
+     */
+    @Test
+    void searchAssignedTutorByName_shouldReturnFilteredTutor() {
+        //Arrange
+        SearchAssignedUserByNameRequest request=SearchAssignedUserByNameRequest.builder()
+                .studentId(1L)
+                .name("1")
+                .build();
+
+        List<TutorInfoEntity>tutorInfos=List.of(
+                TutorInfoEntity.builder()
+                        .id(2L)
+                        .role(1)
+                        .name("tutor1")
+                        .profilePicURL("pic2.png")
+                        .build(),
+                TutorInfoEntity.builder()
+                        .id(3L)
+                        .role(1)
+                        .name("tutor2")
+                        .profilePicURL("pic3.png")
+                        .build()
+        );
+        List<Tutor>tutors=new ArrayList<>();
+        List<GetAssignedUserResponse>expectedResponses=new ArrayList<>();
+
+
+        for (TutorInfoEntity tutorInfo:tutorInfos){
+            Tutor tutor=Tutor.builder()
+                    .id(tutorInfo.getId())
+                    .profilePicURL(tutorInfo.getProfilePicURL())
+                    .name(tutorInfo.getName())
+                    .role(Role.Tutor)
+                    .build();
+
+            tutors.add(tutor);
+
+            if (tutor.getName().toLowerCase().contains(request.getName().toLowerCase())){
+                expectedResponses.add(GetAssignedUserResponse.builder()
+                        .id(tutor.getId())
+                        .name(tutor.getName())
+                        .profilePicUrl(tutor.getProfilePicURL())
+                        .build());
+            }
+        }
+
+        StudentInfoEntity studentInfo=StudentInfoEntity.builder()
+                .id(request.getStudentId())
+                .role(0)
+                .name("student")
+                .tutors(tutorInfos)
+                .profilePicURL("pic1.png")
+                .build();
+
+        when(userRepository.getUserById(studentInfo.getId())).thenReturn(Optional.of(studentInfo));
+
+        Student student=Student.builder()
+                .id(studentInfo.getId())
+                .name(studentInfo.getName())
+                .role(Role.Student)
+                .profilePicURL(studentInfo.getProfilePicURL())
+                .assignedTutors(tutors)
+                .build();
+
+        when(entityConverter.convertFromStudentEntity(studentInfo)).thenReturn(student);
+
+        //Act
+        List<GetAssignedUserResponse>actualResponses=tutorAssignmentService.searchAssignedTutorByName(request);
 
         //Assert
         assertEquals(expectedResponses,actualResponses);
