@@ -3,6 +3,7 @@ package com.smartbyte.edubookschedulerbackend.business.Impl;
 import com.smartbyte.edubookschedulerbackend.business.TutorAssignmentService;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.AssignStudentToTutorRequest;
+import com.smartbyte.edubookschedulerbackend.business.request.SearchAssignedUserByNameRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetAssignedUserResponse;
 import com.smartbyte.edubookschedulerbackend.domain.Student;
 import com.smartbyte.edubookschedulerbackend.domain.Tutor;
@@ -117,5 +118,20 @@ public class TutorAssignmentServiceImpl implements TutorAssignmentService {
                     .build());
         }
         return responses;
+    }
+
+    /**
+     *
+     * @param request search tutor request
+     * @return list of assigned tutors
+     *
+     * @should return filtered tutor
+     */
+    @Override
+    public List<GetAssignedUserResponse> searchAssignedTutorByName(SearchAssignedUserByNameRequest request) {
+        List<GetAssignedUserResponse>responses=this.GetStudentAssignedTutor(request.getStudentId());
+        return responses.stream()
+                .filter(response->response.getName().toLowerCase().contains(request.getName().toLowerCase()))
+                .toList();
     }
 }

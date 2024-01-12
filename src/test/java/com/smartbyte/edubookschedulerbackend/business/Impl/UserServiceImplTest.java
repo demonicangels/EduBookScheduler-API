@@ -1,6 +1,7 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest;
+import com.smartbyte.edubookschedulerbackend.business.response.GetAssignedUserResponse;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
@@ -19,6 +20,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -213,5 +216,56 @@ class UserServiceImplTest {
 
         //Assert
         assertEquals(expectedResponse,actualResponse);
+    }
+
+    /**
+     * @verifies return searched tutor
+     * @see UserServiceImpl#searchTutorsByName(String)
+     */
+    @Test
+    void searchTutorsByName_shouldReturnSearchedTutor() {
+        //Arrange
+        List<UserEntity>userEntities=List.of(
+                UserEntity.builder()
+                        .id(1L)
+                        .name("tutor1")
+                        .role(Role.Tutor.getRoleId())
+                        .build(),
+                UserEntity.builder()
+                        .id(2L)
+                        .name("tutor10")
+                        .role(Role.Tutor.getRoleId())
+                        .build()
+        );
+
+        when(userRepositoryMock.findByRoleAndNameContainingIgnoreCase(Role.Tutor.getRoleId(), "1"))
+                .thenReturn(userEntities);
+
+        List<Tutor>tutors=new ArrayList<>();
+
+        List<GetAssignedUserResponse>expectedResponses=new ArrayList<>();
+
+        for (UserEntity userEntity:userEntities){
+            Tutor tutor=Tutor.builder()
+                    .id(userEntity.getId())
+                    .name(userEntity.getName())
+                    .role(Role.fromRoleId(userEntity.getRole()))
+                    .build();
+
+            when(converter.convertFromUserEntity(userEntity)).thenReturn(tutor);
+
+            expectedResponses.add(GetAssignedUserResponse.builder()
+                    .id(userEntity.getId())
+                    .name(userEntity.getName())
+                    .profilePicUrl(userEntity.getProfilePicURL())
+                    .build());
+        }
+
+        //Act
+        List<GetAssignedUserResponse>actualResponses=userService.searchTutorsByName("1");
+
+        //Assert
+        assertEquals(expectedResponses,actualResponses);
+
     }
 }

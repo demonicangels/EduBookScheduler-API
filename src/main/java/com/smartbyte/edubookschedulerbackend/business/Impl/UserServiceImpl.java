@@ -1,6 +1,9 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
 import com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest;
+import com.smartbyte.edubookschedulerbackend.business.response.GetAssignedUserResponse;
+import com.smartbyte.edubookschedulerbackend.domain.Role;
+import com.smartbyte.edubookschedulerbackend.domain.Tutor;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
@@ -14,6 +17,7 @@ import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -117,6 +121,32 @@ public class UserServiceImpl implements UserService {
     public Optional<User> getTutorByName(String name) {
         UserEntity user = userRepository.findByNameAndRole(name,1);
         return Optional.of(converter.convertFromUserEntity(user));
+    }
+
+    /**
+     *
+     * @param name tutor name
+     * @return list of tutor
+     *
+     * @should return searched tutor
+     */
+    @Override
+    public List<GetAssignedUserResponse> searchTutorsByName(String name) {
+        List<UserEntity>userEntities=userRepository.findByRoleAndNameContainingIgnoreCase(
+                Role.Tutor.getRoleId(),
+                name
+                );
+
+        return userEntities.stream().map(userEntity -> {
+            Tutor tutor=(Tutor) converter.convertFromUserEntity(userEntity);
+            return GetAssignedUserResponse.builder()
+                    .id(tutor.getId())
+                    .name(tutor.getName())
+                    .profilePicUrl(tutor.getProfilePicURL())
+                    .build();
+        }).toList();
+
+
     }
 
     private UserEntity saveUser(CreateUserRequest request) {
