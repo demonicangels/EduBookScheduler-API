@@ -7,6 +7,7 @@ import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
 import com.smartbyte.edubookschedulerbackend.business.response.LoginResponse;
 import com.smartbyte.edubookschedulerbackend.domain.User;
+import jakarta.annotation.security.RolesAllowed;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,15 +20,16 @@ public class UserController {
     private final LoginService loginService;
     private final UserService userService;
     @PostMapping(value = "login")
-    ResponseEntity<LoginResponse> Login(@RequestBody LoginRequest request){
+    ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
         return ResponseEntity.ok(loginService.Login(request));
     }
 
     @PostMapping(value = "register")
-    ResponseEntity<User> Register(@RequestBody CreateUserRequest request){
+    ResponseEntity<User> register(@RequestBody CreateUserRequest request){
         return ResponseEntity.ok(userService.createUser(request));
     }
 
+    @RolesAllowed("{Tutor, Student, Admin}")
     @GetMapping("{id}")
     ResponseEntity<GetUserProfileResponse>getUserProfile(@PathVariable(value = "id") long id){
         return ResponseEntity.ok(userService.getUserProfile(id));

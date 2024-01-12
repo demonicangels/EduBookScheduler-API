@@ -7,8 +7,7 @@ import com.smartbyte.edubookschedulerbackend.business.request.*;
 import com.smartbyte.edubookschedulerbackend.business.response.*;
 import com.smartbyte.edubookschedulerbackend.domain.*;
 import com.smartbyte.edubookschedulerbackend.domain.BookingRequest;
-import com.smartbyte.edubookschedulerbackend.persistence.BookingRepository;
-import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,8 @@ public class BookingController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+
+    @RolesAllowed("{Student,Admin}")
     @GetMapping("/{id}")
     ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id) {
         Optional<Booking> optBooking = bookingService.getBookingById(id);
@@ -48,6 +49,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
+    @RolesAllowed("{Student, Tutor, Admin}")
     @GetMapping("/user/{id}")
     ResponseEntity<GetUsersBookingResponse> getUsersBooking(@PathVariable("id") long id) {
         Optional<User> optUser = userService.getUser(id);
@@ -63,18 +65,22 @@ public class BookingController {
 
     }
 
+    @RolesAllowed("{Student, Tutor, Admin}")
     @GetMapping("upcoming/{studentId}")
     ResponseEntity<List<GetUpcomingBookingsResponse>>getUpcomingBookings
             (@PathVariable(value = "studentId")long studentId){
         return ResponseEntity.ok(bookingService.getUpcomingBookings(studentId));
     }
 
+    @RolesAllowed("{Student, Tutor}")
     @PostMapping("/schedule")
     ResponseEntity<Void> scheduleBooking(@RequestBody @Valid ScheduleBookingRequest request){
         bookingService.scheduleBooking(request);
 
         return ResponseEntity.noContent().build();
     }
+
+    @RolesAllowed("{Student, Tutor}")
     @PostMapping("/cancel")
     ResponseEntity<Void> cancelBooking(@RequestBody UpdateBookingStateRequest request){
         Booking booking = bookingService.getBookingById(request.getBookingId()).get();
@@ -98,6 +104,8 @@ public class BookingController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @RolesAllowed("{Student, Tutor}")
     @PostMapping("/accept")
     ResponseEntity<Void> acceptBooking(@RequestBody AcceptBookingRequest request){
 
@@ -126,12 +134,15 @@ public class BookingController {
         return ResponseEntity.noContent().build();
 
     }
+
+    @RolesAllowed("{Tutor}")
     @PostMapping("/finish")
     ResponseEntity<Void>finishBooking(@RequestBody UpdateBookingStateRequest request){
         bookingService.finishBooking(request);
         return ResponseEntity.noContent().build();
     }
 
+    @RolesAllowed("{Student, Tutor}")
     @PostMapping("/reschedule")
     ResponseEntity<Void> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
         bookingService.rescheduleBooking(request);
@@ -139,6 +150,7 @@ public class BookingController {
         return ResponseEntity.noContent().build();
     }
 
+    @RolesAllowed("{Student, Tutor}")
     @GetMapping("/request/sentby/{id}")
     ResponseEntity<List<BookingRequest>> getRequestsSentBy(@PathVariable("id") long userId){
         User user = userService.getUser(userId)
@@ -147,6 +159,7 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getSentBookingRequests(user));
     }
 
+    @RolesAllowed("{Student, Tutor}")
     @GetMapping("/request/receivedby/{id}")
     ResponseEntity<List<BookingRequest>> getRequestsReceivedBy(@PathVariable("id") long userId){
         User user = userService.getUser(userId)
