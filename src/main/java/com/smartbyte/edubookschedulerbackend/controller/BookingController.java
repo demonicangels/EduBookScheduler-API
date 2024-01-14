@@ -5,6 +5,8 @@ import com.smartbyte.edubookschedulerbackend.business.EmailService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.request.*;
 import com.smartbyte.edubookschedulerbackend.business.response.*;
+import com.smartbyte.edubookschedulerbackend.business.security.token.AccessToken;
+import com.smartbyte.edubookschedulerbackend.business.security.token.AccessTokenDecoder;
 import com.smartbyte.edubookschedulerbackend.domain.*;
 import com.smartbyte.edubookschedulerbackend.domain.BookingRequest;
 import jakarta.annotation.security.RolesAllowed;
@@ -21,7 +23,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/booking")
@@ -31,78 +35,142 @@ public class BookingController {
     private final BookingService bookingService;
     private final UserService userService;
     private final EmailService emailService;
+    private final AccessTokenDecoder accessTokenDecoder;
+    private final AccessToken accessToken;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
 
-    @RolesAllowed("{Student,Admin}")
-    @GetMapping("/{id}")
+
+    @RolesAllowed("{Student,Admin, Tutor}")
+    @GetMapping("/{id}/{token}")
     ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id) {
-        Optional<Booking> optBooking = bookingService.getBookingById(id);
-        if (optBooking.isEmpty())
-            return ResponseEntity.notFound().build();
-        Booking booking = optBooking.get();
-        GetBookingByIdResponse response = GetBookingByIdResponse.builder()
-                .booking(booking)
-                .build();
-        return ResponseEntity.ok(response);
+
+
+        boolean isStudent = accessToken.hasRole(Role.Student.name());
+        boolean isAdmin = accessToken.hasRole(Role.Admin.name());
+        boolean isTutor = accessToken.hasRole(Role.Tutor.name());
+        Optional<User> user = userService.getUser(accessToken.getId());
+
+
+
+        if(!user.isEmpty() && (isStudent || isAdmin || isTutor)){
+
+                Optional<Booking> optBooking = bookingService.getBookingById(id);
+                if (!optBooking.isEmpty()){
+                    Booking booking = optBooking.get();
+                    GetBookingByIdResponse response = GetBookingByIdResponse.builder()
+                            .booking(booking)
+                            .build();
+                    return ResponseEntity.ok(response);
+                }
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @RolesAllowed("{Student, Tutor, Admin}")
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/{id}/{token}")
     ResponseEntity<GetUsersBookingResponse> getUsersBooking(@PathVariable("id") long id) {
-        Optional<User> optUser = userService.getUser(id);
-        if (optUser.isEmpty())
-            return ResponseEntity.notFound().build();
 
-        User user = optUser.get();
-        List<Booking> bookings = bookingService.getUsersBooking(user);
-        GetUsersBookingResponse response = GetUsersBookingResponse.builder()
-                .bookings(bookings)
-                .build();
-        return ResponseEntity.ok(response);
+        boolean isStudent = accessToken.hasRole(Role.Student.name());
+        boolean isAdmin = accessToken.hasRole(Role.Admin.name());
+        boolean isTutor = accessToken.hasRole(Role.Tutor.name());
+        boolean isAuthorizedUser = accessToken.getId() == id;
+        Optional<User> userFromDb = userService.getUser(id);
+        List<Booking> wantedBookings = bookingService.getUsersBooking(userFromDb.get());
 
+
+        if(!userFromDb.isEmpty() && (isStudent || isTutor || isAdmin) && !wantedBookings.isEmpty() && isAuthorizedUser){
+            boolean containsUserId = wantedBookings
+                    .stream()
+                    .anyMatch(app -> app.getTutor().getId().equals(id) || app.getStudent().getId().equals(id));
+
+            if(containsUserId){
+                User user = userFromDb.get();
+                List<Booking> bookings = bookingService.getUsersBooking(user);
+                GetUsersBookingResponse response = GetUsersBookingResponse.builder()
+                        .bookings(bookings)
+                        .build();
+                return ResponseEntity.ok(response);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @RolesAllowed("{Student, Tutor, Admin}")
     @GetMapping("upcoming/{studentId}")
     ResponseEntity<List<GetUpcomingBookingsResponse>>getUpcomingBookings
             (@PathVariable(value = "studentId")long studentId){
-        return ResponseEntity.ok(bookingService.getUpcomingBookings(studentId));
+
+        boolean isStudent = accessToken.hasRole(Role.Student.name());
+        boolean isAdmin = accessToken.hasRole(Role.Admin.name());
+        boolean isTutor = accessToken.hasRole(Role.Tutor.name());
+        boolean isAuthorizedUser = accessToken.getId() == studentId;
+        Optional<User> userFromDb = userService.getUser(studentId);
+
+        if(!userFromDb.isEmpty() && (isStudent || isAdmin || isTutor) && isAuthorizedUser){
+            return ResponseEntity.ok(bookingService.getUpcomingBookings(studentId));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @RolesAllowed("{Student, Tutor}")
     @PostMapping("/schedule")
     ResponseEntity<Void> scheduleBooking(@RequestBody @Valid ScheduleBookingRequest request){
-        bookingService.scheduleBooking(request);
 
-        return ResponseEntity.noContent().build();
+        boolean isStudent = accessToken.hasRole(Role.Student.name());
+        boolean isTutor = accessToken.hasRole(Role.Tutor.name());
+        boolean isAuthorizedUser = accessToken.getId() == request.getRequesterId();
+        Optional<User> userFromDb = userService.getUser(request.getRequesterId());
+
+
+        if(!userFromDb.isEmpty() && (isStudent || isTutor) && isAuthorizedUser){
+            bookingService.scheduleBooking(request);
+
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
     }
 
     @RolesAllowed("{Student, Tutor}")
     @PostMapping("/cancel")
     ResponseEntity<Void> cancelBooking(@RequestBody UpdateBookingStateRequest request){
-        Booking booking = bookingService.getBookingById(request.getBookingId()).get();
 
-        Date date = booking.getDate();
-        LocalDateTime inputDateTime = LocalDateTime.parse(date.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("y-M-d");
+        boolean isStudent = accessToken.hasRole(Role.Student.name());
+        boolean isTutor = accessToken.hasRole(Role.Tutor.name());
+        Optional<Booking> booking = bookingService.getBookingById(request.getBookingId());
 
-        String tutor = booking.getTutor().getName();
-        String about = booking.getDescription();
+        if(isStudent || isTutor && !booking.isEmpty()){
+            Booking bookingToUpdate = booking.get();
+            boolean containsUserId = Stream.of(bookingToUpdate.getStudent(), bookingToUpdate.getTutor())
+                    .mapToLong(User::getId)
+                    .anyMatch(userId -> Objects.equals(userId, accessToken.getId()));
 
+            if(containsUserId){
+                Date date = bookingToUpdate.getDate();
+                LocalDateTime inputDateTime = LocalDateTime.parse(date.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+                DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("y-M-d");
 
-        SendEmailRequest emailRequest = SendEmailRequest.builder()
-                .message("Booking with " + tutor +
-                        " on " + inputDateTime.format(outputFormatter) +
-                        ". Description of the booking: " + about + "has been canceled. The tutor isn't available at this time. Please reschedule.")
-                .subject("Booking Canceled")
-                .build();
-        emailService.sendEmail(emailRequest);
-        bookingService.cancelBooking(request);
+                String tutor = bookingToUpdate.getTutor().getName();
+                String about = bookingToUpdate.getDescription();
 
-        return ResponseEntity.noContent().build();
+                SendEmailRequest emailRequest = SendEmailRequest.builder()
+                        .message("Booking with " + tutor +
+                                " on " + inputDateTime.format(outputFormatter) +
+                                ". Description of the booking: " + about + "has been canceled. The tutor isn't available at this time. Please reschedule.")
+                        .subject("Booking Canceled")
+                        .build();
+                emailService.sendEmail(emailRequest);
+                bookingService.cancelBooking(request);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @RolesAllowed("{Student, Tutor}")
@@ -138,16 +206,39 @@ public class BookingController {
     @RolesAllowed("{Tutor}")
     @PostMapping("/finish")
     ResponseEntity<Void>finishBooking(@RequestBody UpdateBookingStateRequest request){
-        bookingService.finishBooking(request);
-        return ResponseEntity.noContent().build();
+        boolean isTutor = accessToken.hasRole(Role.Tutor.name());
+        Optional<Booking> booking = bookingService.getBookingById(request.getBookingId());
+
+        if(isTutor && !booking.isEmpty()) {
+            Booking bookingToUpdate = booking.get();
+            boolean containsUserId = bookingToUpdate.getTutor().getId().equals(accessToken.getId());
+
+            if (containsUserId) {
+                bookingService.finishBooking(request);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @RolesAllowed("{Student, Tutor}")
     @PostMapping("/reschedule")
     ResponseEntity<Void> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
-        bookingService.rescheduleBooking(request);
 
-        return ResponseEntity.noContent().build();
+        boolean isStudent = accessToken.hasRole(Role.Student.name());
+        boolean isTutor = accessToken.hasRole(Role.Tutor.name());
+        boolean isAuthorizedUser = accessToken.getId() == request.getRequesterId();
+
+
+        if((isStudent || isTutor) && isAuthorizedUser){
+
+            bookingService.rescheduleBooking(request);
+
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
     }
 
     @RolesAllowed("{Student, Tutor}")
