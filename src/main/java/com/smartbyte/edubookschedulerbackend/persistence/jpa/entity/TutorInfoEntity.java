@@ -13,12 +13,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class TutorInfoEntity extends UserEntity {
-    
-    @ManyToMany(mappedBy = "tutors")
+
+    @ManyToMany
     @JoinTable(
             name = "assign_tutor",
             joinColumns = @JoinColumn(name = "tutorInfo_id"),
-            inverseJoinColumns =@JoinColumn(name = "studentInfo_id")
+            inverseJoinColumns = @JoinColumn(name = "studentInfo_id")
     )
-    List<StudentInfoEntity> students;
+    private List<StudentInfoEntity> students;
 }

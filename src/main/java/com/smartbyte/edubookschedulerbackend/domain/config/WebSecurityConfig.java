@@ -1,7 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.domain.config;
 
-import com.smartbyte.edubookschedulerbackend.business.AuthenticationService;
-import jakarta.servlet.Filter;
+import com.smartbyte.edubookschedulerbackend.business.security.auth.AuthenticationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -39,7 +38,7 @@ public class WebSecurityConfig {
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(configure -> configure.authenticationEntryPoint(authenticationEntryPoint))
-                .addFilterBefore((Filter) authenticationService, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authenticationService, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
 

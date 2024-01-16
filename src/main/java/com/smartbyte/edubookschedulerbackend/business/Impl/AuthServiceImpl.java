@@ -1,6 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
-import com.smartbyte.edubookschedulerbackend.business.AuthenticationService;
+import com.smartbyte.edubookschedulerbackend.business.AuthService;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.JWTResponse;
@@ -21,7 +21,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationServiceImpl implements AuthenticationService {
+public class AuthServiceImpl implements AuthService {
 
    private final EntityConverter converter;
    private final PasswordEncoder passwordEncoder;

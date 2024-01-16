@@ -1,6 +1,7 @@
 package com.smartbyte.edubookschedulerbackend.business.security.auth;
 
-import com.example.pawsicare.business.security.token.AccessToken;
+
+import com.smartbyte.edubookschedulerbackend.business.security.token.AccessToken;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;

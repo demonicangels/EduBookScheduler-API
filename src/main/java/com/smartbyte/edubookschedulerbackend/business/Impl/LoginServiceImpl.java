@@ -5,6 +5,10 @@ import com.smartbyte.edubookschedulerbackend.business.exception.InvalidPasswordE
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.LoginResponse;
+import com.smartbyte.edubookschedulerbackend.business.security.token.AccessToken;
+import com.smartbyte.edubookschedulerbackend.business.security.token.impl.AccessTokenDecoderEncoderImpl;
+import com.smartbyte.edubookschedulerbackend.business.security.token.impl.AccessTokenImpl;
+import com.smartbyte.edubookschedulerbackend.domain.Role;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
@@ -19,6 +23,7 @@ import java.util.Optional;
 public class LoginServiceImpl implements LoginService {
     private final UserRepository userRepository;
     private final EntityConverter entityConverter;
+    private final AccessTokenDecoderEncoderImpl accessTokenService;
 
     /**
      *
@@ -46,11 +51,28 @@ public class LoginServiceImpl implements LoginService {
             throw new InvalidPasswordException();
         }
 
+        String accessToken = generateAccessToken(user);
+
         return LoginResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .profilePicURL(user.getProfilePicURL())
                 .role(user.getRole())
+                .accessToken(accessToken)
                 .build();
+    }
+
+    public String generateAccessToken(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
+        Long userId = user.getId();
+        Role role = user.getRole();
+
+        return accessTokenService.generateJWT(
+                AccessTokenImpl.builder()
+                        .userId(userId)
+                        .role(role).build());
     }
 }
