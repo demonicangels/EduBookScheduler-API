@@ -25,6 +25,8 @@ public class AvailabilityController {
         return ResponseEntity.ok(response);
     }
 
+
+
     @PostMapping("/getTutor")
     ResponseEntity<List<GetAvailabilityResponse>> getAvailabilityOfTeachers(@RequestBody GetAvailabilityRequest request){
         List<GetAvailabilityResponse>response = availabilityService.findAvailableTeachersByDateAndTime(request);

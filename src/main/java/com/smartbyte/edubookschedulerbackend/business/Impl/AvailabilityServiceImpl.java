@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -204,7 +205,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
      * @return List of user's availabilities
      *
      * @should throw RunTimeException if user is not found
-     * @should return List of availabilities
+     * @should return List of availabilities45
      */
     @Override
     public List<GetSetAvailabilityResponse> getAvailabilityOfTutorWeekly(long id) {
@@ -212,10 +213,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         if (tutorOptional.isPresent()) {
             UserEntity tutor = tutorOptional.get();
             LocalDate currentDate = LocalDate.now();
-            LocalDate startOfWeek = currentDate.with(DayOfWeek.MONDAY);
-            LocalDate endOfWeek = currentDate.with(DayOfWeek.SATURDAY);
-            Date startDate = Date.from(startOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date endDate = Date.from(endOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            int currentYear = currentDate.getYear();
+            int currentMonth = currentDate.getMonthValue();
+            LocalDate firstDayOfMonth = LocalDate.of(currentYear, currentMonth, 1);
+            LocalDate lastDayOfMonth = firstDayOfMonth.with(TemporalAdjusters.lastDayOfMonth());
+            Date startDate = Date.from(firstDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date endDate = Date.from(lastDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
 
             GetAvailabilityTutorResponse bookingsResponse = getTutorsBooking(id);
             List<Booking> bookings = bookingsResponse.getBookings();
