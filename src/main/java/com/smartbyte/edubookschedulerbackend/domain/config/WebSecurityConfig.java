@@ -1,6 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.domain.config;
 
-import com.smartbyte.edubookschedulerbackend.business.security.auth.AuthenticationService;
+import com.smartbyte.edubookschedulerbackend.business.security.auth.AuthenticationService;;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,25 +20,25 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableMethodSecurity(jsr250Enabled = true)
 @Configuration
 public class WebSecurityConfig {
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity,
                                            AuthenticationEntryPoint authenticationEntryPoint,
-                                           AuthenticationService authenticationService) throws Exception {
+                                           AuthenticationService jwtAuthenticationFilter) throws Exception {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(configurer ->
                         configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(registry ->
-                        registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()   // CORS pre-flight requests should be public
-                                .requestMatchers(HttpMethod.POST,"/users/login", "/users/register").permitAll()
-
-
+                        registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users/login", "/users/register").permitAll()
                                 .requestMatchers("/ws", "/messages/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(configure -> configure.authenticationEntryPoint(authenticationEntryPoint))
-                .addFilterBefore(authenticationService, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return httpSecurity.build();
     }
 

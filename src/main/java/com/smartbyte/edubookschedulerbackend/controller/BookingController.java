@@ -6,7 +6,6 @@ import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.request.*;
 import com.smartbyte.edubookschedulerbackend.business.response.*;
 import com.smartbyte.edubookschedulerbackend.business.security.token.AccessToken;
-import com.smartbyte.edubookschedulerbackend.business.security.token.AccessTokenDecoder;
 import com.smartbyte.edubookschedulerbackend.domain.*;
 import com.smartbyte.edubookschedulerbackend.domain.BookingRequest;
 import jakarta.annotation.security.RolesAllowed;
@@ -32,15 +31,14 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:4173"})
 public class BookingController {
+
     private final BookingService bookingService;
     private final UserService userService;
     private final EmailService emailService;
-    private final AccessTokenDecoder accessTokenDecoder;
     private final AccessToken accessToken;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
-
 
 
     @RolesAllowed("{Student,Admin, Tutor}")
@@ -71,7 +69,7 @@ public class BookingController {
     }
 
     @RolesAllowed("{Student, Tutor, Admin}")
-    @GetMapping("/user/{id}/{token}")
+    @GetMapping("/user/{id}")
     ResponseEntity<GetUsersBookingResponse> getUsersBooking(@PathVariable("id") long id) {
 
         boolean isStudent = accessToken.hasRole(Role.Student.name());
@@ -123,7 +121,7 @@ public class BookingController {
 
         boolean isStudent = accessToken.hasRole(Role.Student.name());
         boolean isTutor = accessToken.hasRole(Role.Tutor.name());
-        boolean isAuthorizedUser = accessToken.getId() == request.getRequesterId();
+        boolean isAuthorizedUser = accessToken.getId().equals(request.getRequesterId());
         Optional<User> userFromDb = userService.getUser(request.getRequesterId());
 
 
@@ -228,7 +226,7 @@ public class BookingController {
 
         boolean isStudent = accessToken.hasRole(Role.Student.name());
         boolean isTutor = accessToken.hasRole(Role.Tutor.name());
-        boolean isAuthorizedUser = accessToken.getId() == request.getRequesterId();
+        boolean isAuthorizedUser = accessToken.getId().equals(request.getRequesterId());
 
 
         if((isStudent || isTutor) && isAuthorizedUser){

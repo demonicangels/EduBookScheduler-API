@@ -11,7 +11,7 @@ import com.smartbyte.edubookschedulerbackend.business.security.token.AccessToken
 import com.smartbyte.edubookschedulerbackend.domain.Role;
 import com.smartbyte.edubookschedulerbackend.domain.User;
 import jakarta.annotation.security.RolesAllowed;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +20,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-@AllArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173","http://localhost:4173", "http://localhost:5174"})
+@RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:5173","http://localhost:4173", "http://localhost:5174"}, methods = {RequestMethod.GET, RequestMethod.POST}, allowedHeaders = {})
 public class UserController {
+
     private final LoginService loginService;
     private final UserService userService;
     private final AccessToken accessToken;
@@ -40,6 +41,7 @@ public class UserController {
     @RolesAllowed("{Tutor, Student, Admin}")
     @GetMapping("{id}")
     ResponseEntity<GetUserProfileResponse>getUserProfile(@PathVariable(value = "id") long id){
+
         boolean isUserAuthenticated = accessToken.getId().equals(id);
         boolean isStudent = accessToken.hasRole(Role.Student.name());
         boolean isAdmin = accessToken.hasRole(Role.Admin.name());
