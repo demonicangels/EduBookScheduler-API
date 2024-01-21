@@ -1,5 +1,8 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
+import com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest;
+import com.smartbyte.edubookschedulerbackend.business.response.GetAssignedUserResponse;
+import com.smartbyte.edubookschedulerbackend.domain.User;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
@@ -11,15 +14,20 @@ import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.StudentInfoE
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -132,5 +140,132 @@ class UserServiceImplTest {
 
         //Assert
         assertEquals(expectedResponse,actualResponse);
+    }
+
+    /**
+     * @verifies save user
+     * @see UserServiceImpl#createUser(com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest)
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"Tutor","Student"})
+    void createUser_shouldSaveUser(Role role){
+        //Arrange
+        int roleInt=role.name().equalsIgnoreCase("Tutor") ? 1 : 0 ;
+
+        CreateUserRequest request=CreateUserRequest.builder()
+                .role(role)
+                .password("user")
+                .email("user@email.com")
+                .profilePicURL("image")
+                .name("user")
+                .build();
+
+        UserEntity userEntity=UserEntity.builder()
+                .id(1L)
+                .role(roleInt)
+                .build();
+
+        User user;
+        //Act
+
+        //Assert
+    }
+
+    /**
+     * @verifies delete User
+     * @see UserServiceImpl#deleteUser(User)
+     */
+    @Test
+    void deleteUser_shouldDeleteUser() {
+        //Arrange
+        User user=Tutor.builder().build();
+
+        UserEntity userEntity=UserEntity.builder().build();
+
+        when(converter.convertFromUser(user)).thenReturn(userEntity);
+
+        //Act
+        userService.deleteUser(user);
+
+        //Assert
+        verify(userRepositoryMock).delete(userEntity);
+    }
+
+    /**
+     * @verifies return user
+     * @see UserServiceImpl#getUser(long)
+     */
+    @Test
+    void getUser_shouldReturnUser() {
+        //Arrange
+        UserEntity userEntity=UserEntity.builder()
+                .id(1L)
+                .build();
+
+        User user=Tutor.builder()
+                .id(userEntity.getId())
+                .build();
+
+        when(userRepositoryMock.findById(user.getId())).thenReturn(Optional.of(userEntity));
+        when(converter.convertFromUserEntity(userEntity)).thenReturn(user);
+
+        Optional<User>expectedResponse=Optional.of(user);
+
+        //Act
+        Optional<User>actualResponse=userService.getUser(user.getId());
+
+        //Assert
+        assertEquals(expectedResponse,actualResponse);
+    }
+
+    /**
+     * @verifies return searched tutor
+     * @see UserServiceImpl#searchTutorsByName(String)
+     */
+    @Test
+    void searchTutorsByName_shouldReturnSearchedTutor() {
+        //Arrange
+        List<UserEntity>userEntities=List.of(
+                UserEntity.builder()
+                        .id(1L)
+                        .name("tutor1")
+                        .role(Role.Tutor.getRoleId())
+                        .build(),
+                UserEntity.builder()
+                        .id(2L)
+                        .name("tutor10")
+                        .role(Role.Tutor.getRoleId())
+                        .build()
+        );
+
+        when(userRepositoryMock.findByRoleAndNameContainingIgnoreCase(Role.Tutor.getRoleId(), "1"))
+                .thenReturn(userEntities);
+
+        List<Tutor>tutors=new ArrayList<>();
+
+        List<GetAssignedUserResponse>expectedResponses=new ArrayList<>();
+
+        for (UserEntity userEntity:userEntities){
+            Tutor tutor=Tutor.builder()
+                    .id(userEntity.getId())
+                    .name(userEntity.getName())
+                    .role(Role.fromRoleId(userEntity.getRole()))
+                    .build();
+
+            when(converter.convertFromUserEntity(userEntity)).thenReturn(tutor);
+
+            expectedResponses.add(GetAssignedUserResponse.builder()
+                    .id(userEntity.getId())
+                    .name(userEntity.getName())
+                    .profilePicUrl(userEntity.getProfilePicURL())
+                    .build());
+        }
+
+        //Act
+        List<GetAssignedUserResponse>actualResponses=userService.searchTutorsByName("1");
+
+        //Assert
+        assertEquals(expectedResponses,actualResponses);
+
     }
 }

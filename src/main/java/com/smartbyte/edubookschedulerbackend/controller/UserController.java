@@ -4,6 +4,7 @@ import com.smartbyte.edubookschedulerbackend.business.LoginService;
 import com.smartbyte.edubookschedulerbackend.business.UserService;
 import com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest;
 import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
+import com.smartbyte.edubookschedulerbackend.business.response.GetAssignedUserResponse;
 import com.smartbyte.edubookschedulerbackend.business.response.GetUserProfileResponse;
 import com.smartbyte.edubookschedulerbackend.business.response.LoginResponse;
 import com.smartbyte.edubookschedulerbackend.business.security.token.AccessToken;
@@ -14,6 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -46,5 +49,11 @@ public class UserController {
             return ResponseEntity.ok(userService.getUserProfile(id));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @GetMapping("/tutor/{name}")
+    ResponseEntity<List<GetAssignedUserResponse>>searchTutorByName(@PathVariable String name){
+        List<GetAssignedUserResponse>responses=userService.searchTutorsByName(name);
+        return ResponseEntity.ok(responses);
     }
 }

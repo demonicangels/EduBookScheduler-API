@@ -45,6 +45,7 @@ public class AvailabilityController {
 
     }
 
+
     @RolesAllowed("{Student}")
     @PostMapping("/getTutor")
     ResponseEntity<List<GetAvailabilityResponse>> getAvailabilityOfTeachers(@RequestBody GetAvailabilityRequest request){

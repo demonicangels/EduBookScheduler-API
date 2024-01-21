@@ -20,6 +20,7 @@ import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.BookingEntit
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +30,12 @@ import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class AvailabilityServiceImpl implements AvailabilityService {
 
     private final BookingRepository bookingRepository;
@@ -74,6 +77,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 .build()).toList();
     }
 
+    /**
+     *
+     * @return GetUsersResponse
+     *
+     * @should return empty list if tutor is not found
+     * @should return list of tutors if tutors are found
+     */
     @Override
     public GetUsersResponse GetTutors() {
         List<UserEntity> tutorEntity = userRepository.findByRole(1);
@@ -86,6 +96,14 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         return response;
     }
 
+    /**
+     *
+     * @param id tutor's id
+     * @return GetTutorsNameResponse or null
+     *
+     * @should return null if user is not found
+     * @should return tutor's name if user is found
+     */
     @Override
     public GetTutorsNameResponse GetTutorsName(long id) {
         Optional<UserEntity> user = userRepository.getUserById(id);
@@ -98,6 +116,14 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         return null;
     }
 
+    /**
+     *
+     * @param id User's id
+     * @return GetAvailabilityTutorResponse
+     *
+     * @should throw UserNotFoundException when user is not found
+     * @should return GetAvailabilityTutorResponse
+     */
     @Override
     public GetAvailabilityTutorResponse getTutorsBooking(long id) {
         Optional<UserEntity> user = userRepository.findById(id);
@@ -112,6 +138,16 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             throw new UserNotFoundException();
         }
     }
+
+    /**
+     *
+     * @param requests List of CreateSetAvailabilityRequest
+     * @return List of CreateSetAvailabilityResponse
+     *
+     * @should throw RunTimeException if tutor is not found
+     * @should throw RunTimeException if time overlaps
+     * @should add new availabilities
+     */
     @Transactional
     @Override
     public List<CreateSetAvailabilityResponse> createAvailability(List<CreateSetAvailabilityRequest> requests) {
@@ -137,7 +173,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         List<AvailabilityEntity> savedAvailabilityEntities = new ArrayList<>();
 
         for (AvailabilityEntity newAvailability : newAvailabilityEntities) {
-            try {
+//            try {
                 List<AvailabilityEntity> existingAvailability = availabilityRepository
                         .findAllByTutorAndDate(newAvailability.getTutor(), newAvailability.getDate());
 
@@ -150,9 +186,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
                 AvailabilityEntity savedAvailabilityEntity = availabilityRepository.save(entityManager.merge(newAvailability));
                 savedAvailabilityEntities.add(savedAvailabilityEntity);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
         List<AvailabilityDomain> availabilityDomains = savedAvailabilityEntities.stream()
@@ -166,18 +199,27 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     }
 
-
-
+    /**
+     *
+     * @param id User id
+     * @return List of user's availabilities
+     *
+     * @should throw RunTimeException if user is not found
+     * @should return List of availabilities45
+     */
     @Override
     public List<GetSetAvailabilityResponse> getAvailabilityOfTutorWeekly(long id) {
         Optional<UserEntity> tutorOptional = userRepository.getUserById(id);
         if (tutorOptional.isPresent()) {
             UserEntity tutor = tutorOptional.get();
             LocalDate currentDate = LocalDate.now();
-            LocalDate startOfWeek = currentDate.with(DayOfWeek.SUNDAY);
-            LocalDate endOfWeek = currentDate.with(DayOfWeek.SATURDAY);
-            Date startDate = Date.from(startOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date endDate = Date.from(endOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            int currentYear = currentDate.getYear();
+            int currentMonth = currentDate.getMonthValue();
+            LocalDate firstDayOfMonth = LocalDate.of(currentYear, currentMonth, 1);
+            LocalDate lastDayOfMonth = firstDayOfMonth.with(TemporalAdjusters.lastDayOfMonth());
+            Date startDate = Date.from(firstDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date endDate = Date.from(lastDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
 
             GetAvailabilityTutorResponse bookingsResponse = getTutorsBooking(id);
             List<Booking> bookings = bookingsResponse.getBookings();
@@ -229,8 +271,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 availabilityDomain.getEndTime() > bookingStartTime;
     }
 
-
-
     private Date convertStringToDate(String dateString) {
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -246,6 +286,40 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 && newAvailability.getStartTime() < existingAvailability.getEndTime();
     }
 
+/*    @Override
+    public List<Appointment> createDoctorSchedule(String token, DayOfWeek startDay, DayOfWeek endDay, LocalTime startTime, LocalTime endTime) {
+        AccessToken tokenClaims =  accessTokenDecoder.decode(token);
 
+        Long doctorId = tokenClaims.getId();
+
+        Doctor doctor = doctorManager.getDoctor(doctorId);
+
+        LocalDateTime currentDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
+
+        YearMonth yearMonth = YearMonth.of(currentDateTime.getYear(),currentDateTime.getMonth());
+        numberOfDaysInMonth = yearMonth.lengthOfMonth();
+
+        LocalDateTime endDateTime = currentDateTime.plusDays(numberOfDaysInMonth);
+
+        List<Appointment> appointments = new ArrayList<>();
+
+        while (currentDateTime.isBefore(endDateTime)){
+            DayOfWeek dayOfWeek = DayOfWeek.values()[currentDateTime.get(ChronoField.DAY_OF_WEEK) - 1];
+
+            if(dayOfWeek.compareTo(startDay) >= 0 && dayOfWeek.compareTo(endDay) <= 0){
+                if(currentDateTime.getHour() >= startTime.getHour() && currentDateTime.getHour() < endTime.getHour()){
+                    LocalDateTime appStart = currentDateTime;
+                    LocalDateTime appEnd = currentDateTime.plusMinutes(appointmentDurationInMinutes);
+                    appointments.add(Appointment.builder()
+                            .dateAndStart(appStart)
+                            .dateAndEnd(appEnd)
+                            .doctor(doctor).build());
+                }
+            }
+
+            currentDateTime = currentDateTime.plusHours(1);
+        }
+        return appointments;
+    }*/
 }
 
