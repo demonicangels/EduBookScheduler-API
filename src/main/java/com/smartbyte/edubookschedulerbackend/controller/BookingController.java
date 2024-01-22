@@ -41,7 +41,7 @@ public class BookingController {
     private SimpMessagingTemplate messagingTemplate;
 
 
-    @RolesAllowed("{Student,Admin, Tutor}")
+    @RolesAllowed({"Student","Admin", "Tutor"})
     @GetMapping("/{id}/{token}")
     ResponseEntity<GetBookingByIdResponse> getBookingById(@PathVariable("id") long id) {
 
@@ -68,7 +68,7 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @RolesAllowed("{Student, Tutor, Admin}")
+    @RolesAllowed({"Student", "Tutor", "Admin"})
     @GetMapping("/user/{id}")
     ResponseEntity<GetUsersBookingResponse> getUsersBooking(@PathVariable("id") long id) {
 
@@ -98,7 +98,7 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @RolesAllowed("{Student, Tutor, Admin}")
+    @RolesAllowed({"Student", "Tutor", "Admin"})
     @GetMapping("upcoming/{studentId}")
     ResponseEntity<List<GetUpcomingBookingsResponse>>getUpcomingBookings
             (@PathVariable(value = "studentId")long studentId){
@@ -115,7 +115,7 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    @RolesAllowed("{Student, Tutor}")
+    @RolesAllowed({"Student", "Tutor"})
     @PostMapping("/schedule")
     ResponseEntity<Void> scheduleBooking(@RequestBody @Valid ScheduleBookingRequest request){
 
@@ -134,7 +134,7 @@ public class BookingController {
 
     }
 
-    @RolesAllowed("{Student, Tutor}")
+    @RolesAllowed({"Student", "Tutor"})
     @PostMapping("/cancel")
     ResponseEntity<Void> cancelBooking(@RequestBody UpdateBookingStateRequest request){
 
@@ -171,7 +171,7 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @RolesAllowed("{Student, Tutor}")
+    @RolesAllowed({"Student", "Tutor"})
     @PostMapping("/accept")
     ResponseEntity<Void> acceptBooking(@RequestBody AcceptBookingRequest request){
 
@@ -201,7 +201,7 @@ public class BookingController {
 
     }
 
-    @RolesAllowed("{Tutor}")
+    @RolesAllowed({"Tutor"})
     @PostMapping("/finish")
     ResponseEntity<Void>finishBooking(@RequestBody UpdateBookingStateRequest request){
         boolean isTutor = accessToken.hasRole(Role.Tutor.name());
@@ -220,7 +220,7 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @RolesAllowed("{Student, Tutor}")
+    @RolesAllowed({"Student", "Tutor"})
     @PostMapping("/reschedule")
     ResponseEntity<Void> rescheduleBooking(@RequestBody RescheduleBookingRequest request) {
 
@@ -239,7 +239,7 @@ public class BookingController {
 
     }
 
-    @RolesAllowed("{Student, Tutor}")
+    @RolesAllowed({"Student", "Tutor"})
     @GetMapping("/request/sentby/{id}")
     ResponseEntity<List<BookingRequest>> getRequestsSentBy(@PathVariable("id") long userId){
         User user = userService.getUser(userId)
@@ -248,7 +248,7 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getSentBookingRequests(user));
     }
 
-    @RolesAllowed("{Student, Tutor}")
+    @RolesAllowed({"Student", "Tutor"})
     @GetMapping("/request/receivedby/{id}")
     ResponseEntity<List<BookingRequest>> getRequestsReceivedBy(@PathVariable("id") long userId){
         User user = userService.getUser(userId)

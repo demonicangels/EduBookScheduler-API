@@ -38,7 +38,7 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(request));
     }
 
-    @RolesAllowed("{Tutor, Student, Admin}")
+    @RolesAllowed({"Tutor", "Student", "Admin"})
     @GetMapping("{id}")
     ResponseEntity<GetUserProfileResponse>getUserProfile(@PathVariable(value = "id") long id){
 

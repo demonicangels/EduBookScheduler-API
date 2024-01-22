@@ -28,7 +28,7 @@ public class AvailabilityController {
     private final AvailabilityService availabilityService;
     private final AccessToken accessToken;
 
-    @RolesAllowed("{Tutor}")
+    @RolesAllowed({"Tutor"})
     @PostMapping("/createAvailability")
     ResponseEntity<List<CreateSetAvailabilityResponse>> createAvailabilityOfTutor(@RequestBody List<CreateSetAvailabilityRequest> requests){
 
@@ -46,7 +46,7 @@ public class AvailabilityController {
     }
 
 
-    @RolesAllowed("{Student}")
+    @RolesAllowed({"Student"})
     @PostMapping("/getTutor")
     ResponseEntity<List<GetAvailabilityResponse>> getAvailabilityOfTeachers(@RequestBody GetAvailabilityRequest request){
         boolean isStudent = accessToken.hasRole(Role.Student.name());
@@ -59,7 +59,7 @@ public class AvailabilityController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @RolesAllowed("{Student}")
+    @RolesAllowed({"Student"})
     @GetMapping("/tutorName/{id}")
     ResponseEntity<GetTutorsNameResponse> getTutorsName(@PathVariable("id") long id){
         boolean isStudent = accessToken.hasRole(Role.Student.name());
@@ -72,7 +72,7 @@ public class AvailabilityController {
 
     }
 
-    @RolesAllowed("{Student}")
+    @RolesAllowed({"Student"})
     @GetMapping("/getTutor")
     ResponseEntity<GetUsersResponse> getTutor(){
         boolean isStudent = accessToken.hasRole(Role.Student.name());
@@ -84,7 +84,7 @@ public class AvailabilityController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @RolesAllowed("{Student}")
+    @RolesAllowed({"Student"})
     @GetMapping("/tutorBookings/{id}")
     ResponseEntity<GetAvailabilityTutorResponse> getTutorAvailability(@PathVariable("id") long id){
         boolean isStudent = accessToken.hasRole(Role.Student.name());
@@ -96,7 +96,7 @@ public class AvailabilityController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @RolesAllowed("{Tutor, Student}")
+    @RolesAllowed({"Tutor", "Student"})
     @GetMapping("/tutorAvailabilityWeekly/{id}")
     ResponseEntity<List<GetSetAvailabilityResponse>> getAvailabilityOfTutorWeekly(@PathVariable("id") long id){
         boolean isStudent = accessToken.hasRole(Role.Student.name());
