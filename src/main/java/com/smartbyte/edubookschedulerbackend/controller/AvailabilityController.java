@@ -8,7 +8,6 @@ import com.smartbyte.edubookschedulerbackend.business.response.*;
 
 import com.smartbyte.edubookschedulerbackend.business.security.token.AccessToken;
 import com.smartbyte.edubookschedulerbackend.domain.Role;
-import com.smartbyte.edubookschedulerbackend.domain.User;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @RestController
