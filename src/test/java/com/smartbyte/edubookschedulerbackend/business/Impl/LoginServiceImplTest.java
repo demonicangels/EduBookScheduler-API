@@ -1,5 +1,7 @@
 package com.smartbyte.edubookschedulerbackend.business.Impl;
 
+import com.smartbyte.edubookschedulerbackend.business.security.token.impl.AccessTokenDecoderEncoderImpl;
+import com.smartbyte.edubookschedulerbackend.business.security.token.impl.AccessTokenImpl;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.EntityConverter;
 import com.smartbyte.edubookschedulerbackend.business.exception.InvalidPasswordException;
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
@@ -9,12 +11,12 @@ import com.smartbyte.edubookschedulerbackend.domain.Role;
 import com.smartbyte.edubookschedulerbackend.domain.Student;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.StudentInfoEntity;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,6 +30,8 @@ class LoginServiceImplTest {
     private UserRepository userRepositoryMock;
     @Mock
     private EntityConverter converter;
+    @Mock
+    private AccessTokenDecoderEncoderImpl accessTokenDecoderEncoder;
     @InjectMocks
     private LoginServiceImpl loginUseCase;
 
@@ -117,14 +121,24 @@ class LoginServiceImplTest {
                 .email(studentEntity.getEmail())
                 .build();
 
+        AccessTokenImpl accessToken=AccessTokenImpl.builder()
+                .userId(student.getId())
+                .role(student.getRole()).build();
+
+        String jwts=Jwts.builder().compact();
+
+        when(accessTokenDecoderEncoder.generateJWT(accessToken)).thenReturn(jwts);
+
         LoginResponse expectedResponse=LoginResponse.builder()
                 .id(student.getId())
                 .role(student.getRole())
                 .name(student.getName())
+                .accessToken(jwts)
                 .build();
 
         when(userRepositoryMock.getUserByEmail(request.getEmail())).thenReturn(Optional.of(studentEntity));
         when(converter.convertFromUserEntity(studentEntity)).thenReturn(student);
+
 
         //Act
         LoginResponse actualResponse=loginUseCase.Login(request);
@@ -169,5 +183,15 @@ class LoginServiceImplTest {
         when(converter.convertFromUserEntity(studentEntity)).thenReturn(student);
         //Act + Assert
         assertThrows(InvalidPasswordException.class,()->loginUseCase.Login(request));
+    }
+
+    /**
+     * @verifies throw IllegalArgumentException when user is not found
+     * @see LoginServiceImpl#generateAccessToken(com.smartbyte.edubookschedulerbackend.domain.User)
+     */
+    @Test
+    public void generateAccessToken_shouldThrowIllegalArgumentExceptionWhenUserIsNotFound() {
+        //Arrange
+        assertThrows(IllegalArgumentException.class,()->loginUseCase.generateAccessToken(null));
     }
 }

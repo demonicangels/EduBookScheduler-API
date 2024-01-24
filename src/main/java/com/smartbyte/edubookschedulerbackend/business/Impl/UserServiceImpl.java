@@ -117,12 +117,6 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    public Optional<User> getTutorByName(String name) {
-        UserEntity user = userRepository.findByNameAndRole(name,1);
-        return Optional.of(converter.convertFromUserEntity(user));
-    }
-
     /**
      *
      * @param name tutor name

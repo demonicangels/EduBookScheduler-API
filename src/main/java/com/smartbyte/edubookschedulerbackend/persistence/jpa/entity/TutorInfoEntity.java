@@ -12,13 +12,14 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class TutorInfoEntity extends UserEntity {
-    
+
     @ManyToMany
     @JoinTable(
             name = "assign_tutor",
             joinColumns = @JoinColumn(name = "tutorInfo_id"),
-            inverseJoinColumns =@JoinColumn(name = "studentInfo_id")
+            inverseJoinColumns = @JoinColumn(name = "studentInfo_id")
     )
-    List<StudentInfoEntity> students;
+    private List<StudentInfoEntity> students;
 }

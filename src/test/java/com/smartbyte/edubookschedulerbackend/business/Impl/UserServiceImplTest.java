@@ -11,11 +11,12 @@ import com.smartbyte.edubookschedulerbackend.domain.Student;
 import com.smartbyte.edubookschedulerbackend.domain.Tutor;
 import com.smartbyte.edubookschedulerbackend.persistence.UserRepository;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.StudentInfoEntity;
+import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.TutorInfoEntity;
 import com.smartbyte.edubookschedulerbackend.persistence.jpa.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -147,28 +148,54 @@ class UserServiceImplTest {
      * @see UserServiceImpl#createUser(com.smartbyte.edubookschedulerbackend.business.request.CreateUserRequest)
      */
     @ParameterizedTest
-    @ValueSource(strings = {"Tutor","Student"})
+    @EnumSource(Role.class)
     void createUser_shouldSaveUser(Role role){
         //Arrange
-        int roleInt=role.name().equalsIgnoreCase("Tutor") ? 1 : 0 ;
-
-        CreateUserRequest request=CreateUserRequest.builder()
+        CreateUserRequest request= CreateUserRequest.builder()
                 .role(role)
-                .password("user")
-                .email("user@email.com")
-                .profilePicURL("image")
-                .name("user")
                 .build();
 
-        UserEntity userEntity=UserEntity.builder()
-                .id(1L)
-                .role(roleInt)
-                .build();
+        UserEntity expectedUserEntity;
 
-        User user;
+        User expectedUser;
+
+        switch (role){
+
+            case Student -> {
+                expectedUserEntity = StudentInfoEntity.builder()
+                        .name(request.getName())
+                        .email(request.getEmail())
+                        .password(request.getPassword())
+                        .profilePicURL(request.getProfilePicURL())
+                        .pcn(123L)
+                        .build();
+
+                expectedUser=Student.builder().build();
+            }
+            case Tutor -> {
+                expectedUserEntity=TutorInfoEntity.builder()
+                        .name(request.getName())
+                        .email(request.getEmail())
+                        .password(request.getPassword())
+                        .profilePicURL(request.getProfilePicURL())
+                        .build();
+                expectedUser=Tutor.builder().build();
+            }
+            default -> {
+                expectedUserEntity=null;
+                expectedUser=null;
+            }
+        }
+
+
+        when(converter.convertFromUserEntity(expectedUserEntity)).thenReturn(expectedUser);
+
         //Act
+        User actualUser=userService.createUser(request);
 
         //Assert
+        assertEquals(expectedUser,actualUser);
+
     }
 
     /**
@@ -241,7 +268,6 @@ class UserServiceImplTest {
         when(userRepositoryMock.findByRoleAndNameContainingIgnoreCase(Role.Tutor.getRoleId(), "1"))
                 .thenReturn(userEntities);
 
-        List<Tutor>tutors=new ArrayList<>();
 
         List<GetAssignedUserResponse>expectedResponses=new ArrayList<>();
 

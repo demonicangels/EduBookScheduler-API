@@ -15,4 +15,5 @@ public class LoginResponse {
     private String name;
     private String profilePicURL;
     private Role role;
+    private String accessToken;
 }
