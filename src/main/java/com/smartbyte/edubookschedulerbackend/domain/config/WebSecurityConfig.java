@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                         configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(registry ->
                         registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/users/login", "/users/register").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users/login", "/users/register", "/assignment").permitAll()
                                 .requestMatchers("/ws", "/messages/**").permitAll()
                                 .anyRequest().authenticated()
                 )
