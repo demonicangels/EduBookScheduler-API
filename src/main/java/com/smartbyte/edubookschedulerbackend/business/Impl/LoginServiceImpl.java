@@ -5,7 +5,6 @@ import com.smartbyte.edubookschedulerbackend.business.exception.InvalidPasswordE
 import com.smartbyte.edubookschedulerbackend.business.exception.UserNotFoundException;
 import com.smartbyte.edubookschedulerbackend.business.request.LoginRequest;
 import com.smartbyte.edubookschedulerbackend.business.response.LoginResponse;
-import com.smartbyte.edubookschedulerbackend.business.security.token.AccessToken;
 import com.smartbyte.edubookschedulerbackend.business.security.token.impl.AccessTokenDecoderEncoderImpl;
 import com.smartbyte.edubookschedulerbackend.business.security.token.impl.AccessTokenImpl;
 import com.smartbyte.edubookschedulerbackend.domain.Role;
@@ -61,6 +60,14 @@ public class LoginServiceImpl implements LoginService {
                 .accessToken(accessToken)
                 .build();
     }
+
+    /**
+     *
+     * @param user User object
+     * @return access token
+     *
+     * @should throw IllegalArgumentException when user is not found
+     */
 
     public String generateAccessToken(User user) {
         if (user == null) {

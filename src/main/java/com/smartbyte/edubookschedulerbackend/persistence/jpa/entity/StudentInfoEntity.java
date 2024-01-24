@@ -1,7 +1,6 @@
 package com.smartbyte.edubookschedulerbackend.persistence.jpa.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -13,6 +12,7 @@ import java.util.List;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class StudentInfoEntity extends UserEntity{
     @Column(name = "pcn")
     private Long pcn;

@@ -15,7 +15,6 @@ public interface UserService {
     void deleteUser(User user);
     GetUserProfileResponse getUserProfile(long id);
 
-    Optional<User> getTutorByName (String name);
 
     List<GetAssignedUserResponse> searchTutorsByName(String name);
 }

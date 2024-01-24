@@ -20,9 +20,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -561,10 +561,12 @@ class AvailabilityServiceImplTest {
 
 
         LocalDate currentDate = LocalDate.now();
-        LocalDate startOfWeek = currentDate.with(DayOfWeek.SUNDAY);
-        LocalDate endOfWeek = currentDate.with(DayOfWeek.SATURDAY);
-        Date startDate = Date.from(startOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endDate = Date.from(endOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        int currentYear = currentDate.getYear();
+        int currentMonth = currentDate.getMonthValue();
+        LocalDate firstDayOfMonth = LocalDate.of(currentYear, currentMonth, 1);
+        LocalDate lastDayOfMonth = firstDayOfMonth.with(TemporalAdjusters.lastDayOfMonth());
+        Date startDate = Date.from(firstDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endDate = Date.from(lastDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         List<BookingEntity>bookingEntities=List.of(
                 BookingEntity.builder()
@@ -579,7 +581,6 @@ class AvailabilityServiceImplTest {
 
         when(bookingRepositoryMock.findByTutor(converter.convertFromUser(tutor))).thenReturn(bookingEntities);
 
-        List<Booking>bookings=new ArrayList<>();
 
         for (BookingEntity bookingEntity:bookingEntities){
             Booking booking=Booking.builder()
@@ -592,7 +593,6 @@ class AvailabilityServiceImplTest {
 
             when(converter.convertFromBookingEntity(bookingEntity)).thenReturn(booking);
 
-            bookings.add(booking);
 
         }
 
